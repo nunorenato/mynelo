@@ -23,4 +23,13 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
+//Logout
+Route::get('/logout', function () {
+    auth()->logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    return redirect('/');
+})->name('logout');
+
 require __DIR__.'/auth.php';
