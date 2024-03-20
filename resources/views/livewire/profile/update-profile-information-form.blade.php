@@ -38,20 +38,22 @@ new class extends Component
     {
         $user = Auth::user();
 
-        $url = null;
-        if ($this->photo) {
-            $url = $this->photo->store('users', 'public');
-        //    dd($url);
-            //$this->user->update(['avatar' => "/storage/$url"]);
-        }
-
-        $validated = $this->validate([
+        $validation = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
             'country_id' => ['nullable'],
             'date_of_birth' => ['nullable', 'date'],
-            'photo' => ['nullable','image'],
-        ]);
+        ];
+
+        $url = null;
+        if ($this->photo && !is_string($this->photo)) {
+            $url = $this->photo->store('users', 'public');
+        //    dd($url);
+            //$this->user->update(['avatar' => "/storage/$url"]);
+            $validation['photo'] = ['nullable','image'];
+        }
+
+        $validated = $this->validate($validation);
         if(!empty($url)){
             $validated['photo'] = "/storage/$url";
         }

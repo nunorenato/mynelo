@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +20,7 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::view('profile', 'profile')
+Route::view('profile', 'livewire.profile.index')
     ->middleware(['auth'])
     ->name('profile');
 
@@ -31,5 +32,9 @@ Route::get('/logout', function () {
 
     return redirect('/');
 })->name('logout');
+
+/*Route::middleware('auth')->group(function () {
+   Volt::route('profile', 'profile.index')->name('profile');
+});*/
 
 require __DIR__.'/auth.php';
