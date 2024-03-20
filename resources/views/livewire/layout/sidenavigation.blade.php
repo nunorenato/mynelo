@@ -3,6 +3,7 @@
 
         {{-- User --}}
         @if($user = auth()->user())
+            @php $user->avatar = $user->photo; @endphp
             <x-mary-menu-separator />
 
             <x-mary-list-item :item="$user" value="name" sub-value="email" no-separator no-hover class="-mx-2 !-my-2 rounded">
@@ -21,7 +22,7 @@
             <x-mary-menu-separator />
         @endif
 
-        <x-mary-menu-item title="Hello" icon="o-sparkles" link="/" />
+        <x-mary-menu-item title="Home" icon="o-home" link="dashboard" />
         <x-mary-menu-sub title="Settings" icon="o-cog-6-tooth">
             <x-mary-menu-item title="Wifi" icon="o-wifi" link="####" />
             <x-mary-menu-item title="Archives" icon="o-archive-box" link="####" />

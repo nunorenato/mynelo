@@ -33,8 +33,9 @@ Route::get('/logout', function () {
     return redirect('/');
 })->name('logout');
 
-/*Route::middleware('auth')->group(function () {
-   Volt::route('profile', 'profile.index')->name('profile');
-});*/
+Route::middleware(['auth', 'verified'])->group(function () {
+   //Volt::route('profile', 'profile.index')->name('profile');
+    //Route::view('/', 'dashboard')->name('dashboard');
+});
 
 require __DIR__.'/auth.php';
