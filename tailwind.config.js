@@ -27,7 +27,7 @@ export default {
         themes: [
             {
                 nelotheme: {
-                    "primary": "darkgrey",
+                    "primary": "lightgray",
                     "secondary": "#f6d860",
                     "accent": "#37cdbe",
                     "neutral": "#3d4451",
