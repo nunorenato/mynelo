@@ -1,16 +1,23 @@
 <?php
 
 use App\Models\User;
+use App\Models\Country;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
 
 new class extends Component
 {
+    use WithFileUploads;
+
     public string $name = '';
     public string $email = '';
+    public string $country_id = '';
+    public $photo  =null;
+    public ?string $date_of_birth;
 
     /**
      * Mount the component.
@@ -19,6 +26,9 @@ new class extends Component
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->country_id = Auth::user()->country_id;
+        $this->photo = Auth::user()->photo;
+        $this->date_of_birth = Auth::user()->date_of_birth;
     }
 
     /**
@@ -28,10 +38,24 @@ new class extends Component
     {
         $user = Auth::user();
 
+        $url = null;
+        if ($this->photo) {
+            $url = $this->photo->store('users', 'public');
+        //    dd($url);
+            //$this->user->update(['avatar' => "/storage/$url"]);
+        }
+
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'country_id' => ['nullable'],
+            'date_of_birth' => ['nullable', 'date'],
+            'photo' => ['nullable','image'],
         ]);
+        if(!empty($url)){
+            $validated['photo'] = "/storage/$url";
+        }
+
 
         $user->fill($validated);
 
@@ -42,6 +66,11 @@ new class extends Component
         $user->save();
 
         $this->dispatch('profile-updated', name: $user->name);
+
+        activity()
+            ->on($user)
+            ->event('updated profile info')
+            ->log('USER update');
     }
 
     /**
@@ -61,8 +90,20 @@ new class extends Component
 
         Session::flash('status', 'verification-link-sent');
     }
-}; ?>
 
+    public function with(): array
+    {
+        return [
+            'countries' => Country::all(),
+        ];
+
+    }
+}?>
+@push('head')
+    {{-- Cropper.js --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+@endpush
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -74,43 +115,44 @@ new class extends Component
         </p>
     </header>
 
-    <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" name="name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
-        </div>
+    <x-mary-form wire:submit="updateProfileInformation" class="mt-6 ">
+        <div class="grid lg:grid-cols-[400px_1fr] gap-5">
+            <div class="space-y-4">
+                <x-mary-input label="Name" wire:model="name" required autofocus autocomplete="name"></x-mary-input>
+                <x-mary-input label="email" wire:model="email" required></x-mary-input>
 
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" name="email" type="email" class="mt-1 block w-full" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
+                    <div>
+                        <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
+                            {{ __('Your email address is unverified.') }}
 
-            @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                        {{ __('Your email address is unverified.') }}
-
-                        <button wire:click.prevent="sendVerification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
-
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
+                            <button wire:click.prevent="sendVerification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                                {{ __('Click here to re-send the verification email.') }}
+                            </button>
                         </p>
-                    @endif
-                </div>
-            @endif
-        </div>
 
+                        @if (session('status') === 'verification-link-sent')
+                            <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
+                                {{ __('A new verification link has been sent to your email address.') }}
+                            </p>
+                        @endif
+                    </div>
+                @endif
+                <x-mary-select label="Country" wire:model="country_id" :options="$countries" placeholder="---"></x-mary-select>
+                <x-mary-datetime label="Date of birth" wire:model="date_of_birth"></x-mary-datetime>
+            </div>
+            <div>
+                <x-mary-file label="Photo" wire:model="photo" accept="image/png, image/jpeg" hint="Click to change" crop-after-change>
+                    <img src="{{ $photo ?? '/images/no-user-photo.png' }}" class="w-40 rounded-lg" alt="Profile photo" />
+                </x-mary-file>
+            </div>
+        </div>
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-mary-button label="Save" spinner="save" type="submit" class="btn-primary" />
 
             <x-action-message class="me-3" on="profile-updated">
                 {{ __('Saved.') }}
             </x-action-message>
         </div>
-    </form>
+    </x-mary-form>
 </section>
