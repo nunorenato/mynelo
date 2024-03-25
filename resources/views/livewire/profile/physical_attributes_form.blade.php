@@ -35,6 +35,7 @@ new class extends Component
             'weight' => ['nullable', 'numeric', 'min:0'],
             'gender' => ['nullable', new Enum(\App\Enums\GenderEnum::class)],
         ]);
+        $validated['alert_fill'] = false;
         $user->fill($validated);
         $user->save();
 

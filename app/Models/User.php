@@ -38,6 +38,7 @@ class User extends Authenticatable
         'competition',
         'time_500',
         'time_1000',
+        'alert_fill',
     ];
 
     /**

@@ -65,13 +65,14 @@ new class extends Component
         self::toDecimalSeconds($validated['time_500']);
         self::toDecimalSeconds($validated['time_1000']);
 
+        $validated['alert_fill'] = false;
 
         $user->fill($validated);
         $user->save();
 
         /**
          * o array validado vem no formato id => true ou false
-         * 
+         *
          * obter os ids apenas dos true, ou seja, seleccionados
          */
         $user->goals()->sync(array_keys($validated['goals'], true));
@@ -100,7 +101,7 @@ new class extends Component
                 $t500 = CarbonInterval::createFromFormat('i:s', $field);
             }
             $field = $t500->total('seconds');
-    
+
         }
     }
 
