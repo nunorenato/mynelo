@@ -7,15 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->unsignedInteger('country_id')->after('email');
+        Schema::table('boats', function (Blueprint $table) {
+            $table->unsignedBigInteger('external_id')->nullable();
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->removeColumn('country_id');
+        Schema::table('boats', function (Blueprint $table) {
+            $table->dropColumn('external_id');
         });
     }
 };

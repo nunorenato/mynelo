@@ -3,5 +3,6 @@
 
     <div class="grid lg:grid-cols-2 gap-5 lg:gap-8">
         <livewire:profile.dashboard></livewire:profile.dashboard>
+        <livewire:boats.dashboard></livewire:boats.dashboard>
     </div>
 </x-app-layout>

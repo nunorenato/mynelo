@@ -16,9 +16,11 @@ use Livewire\Volt\Volt;
 
 Route::view('/', 'welcome');
 
-Route::view('dashboard', 'dashboard')
+//Route::get('/testsync', [\App\Http\Controllers\DealerController::class, 'sync']);
+
+/* Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+    ->name('dashboard'); */
 
 Route::view('profile', 'livewire.profile.index')
     ->middleware(['auth'])
@@ -35,7 +37,8 @@ Route::get('/logout', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
    //Volt::route('profile', 'profile.index')->name('profile');
-    //Route::view('/', 'dashboard')->name('dashboard');
+    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::view('boats', 'livewire.boats.index')->name('boats');
 });
 
 require __DIR__.'/auth.php';

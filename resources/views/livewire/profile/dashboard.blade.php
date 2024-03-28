@@ -3,9 +3,7 @@
 use Livewire\Volt\Component;
 use Livewire\Attributes\{Layout, Title};
 
-new
-#[Title('Login')]
-class extends Component {
+new class extends Component {
 
     public bool $show = false;
 
@@ -22,7 +20,7 @@ class extends Component {
     }
 
 } ?>
-<div class="hidden">
+<div class=""><!-- class hidden?? -->
     @if($show)
     <x-mary-alert title="Some profile data is missing" description="Tell us more about yourself" icon="o-exclamation-triangle" class="" wire:transition>
         <x-slot:actions>

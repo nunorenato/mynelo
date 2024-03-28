@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
             $table->text('club')->nullable();
             $table->integer('weekly_trainings')->nullable();
-            $table->integer('discipline_id')->nullable();
+            $table->foreignId('discipline_id')->nullable()->constrained();
 
         });
     }
@@ -30,7 +30,7 @@ return new class extends Migration {
             $table->dropColumn('gender');
             $table->dropColumn('club');
             $table->dropColumn('weekly_trainings');
-            $table->dropColumn('discipline_id');
+            $table->dropConstrainedForeignId('discipline_id');
         });
     }
 };
