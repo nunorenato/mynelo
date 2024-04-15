@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Attribute;
+use App\Models\PersonType;
 use Illuminate\Database\Seeder;
 use function Laravel\Prompts\table;
 
@@ -19,6 +21,20 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+
+
+
+        PersonType::create([
+            'id' => 1,
+            'name' => 'worker',
+        ]);
+        $this->call([
+           // CountriesTableSeeder::class,
+            //ProductTypeSeeder::class,
+            //DisciplineSeeder::class,
+            //GoalSeeder::class,
+            AttributeSeeder::class,
+        ]);
 
 
     }

@@ -1,4 +1,5 @@
-<div>
+<x-email-layout>
+<div class="btn">
     <h1>An user is trying to register a boat.</h1>
     <h2>User information</h2>
     <dl>
@@ -14,8 +15,9 @@
         <dt>Model</dt>
         <dd>{{ $registration->boat->model }}</dd>
         <dt>Supposed seller</dt>
-        <dd>{{ $registration->seller->name }}</dd>
+        <dd>{{ $registration->seller }}</dd>
     </dl>
     <p><a href="#">Validate</a></p>
     <p><a href="#">Cancel registration</a></p>
 </div>
+</x-email-layout>

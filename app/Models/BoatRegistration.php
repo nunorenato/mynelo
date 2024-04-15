@@ -22,7 +22,7 @@ class BoatRegistration extends Model
         'paddle',
         'paddle_length',
         'status',
-        'seller_id',
+        'seller',
     ];
 
     protected $casts = [
@@ -37,11 +37,6 @@ class BoatRegistration extends Model
     public function user():BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function seller():BelongsTo
-    {
-        return $this->belongsTo(Dealer::class, 'seller_id');
     }
 
 }

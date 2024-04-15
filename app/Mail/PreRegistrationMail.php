@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\BoatRegistration;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -20,7 +21,7 @@ class PreRegistrationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: config('nelo.emails.internal_from'),
+            from: new Address(config('nelo.emails.internal_from'), config('nelo.emails.internal_from_name')),
             subject: 'Boat registration initial validation',
         );
     }

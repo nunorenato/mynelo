@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\BoatSyncJob;
 use App\Models\Boat;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -60,23 +61,25 @@ class BoatController extends Controller
 
 
         return Boat::where('external_id', '=', $externalID)->firstOr(function() use ($externalID){
-            $response = Http::get(config('nelo.nelo_api_url')."/orders/basic/$externalID");
+            $response = Http::get(config('nelo.nelo_api_url')."/orders/extended/$externalID");
             if($response->ok()){
 
                 $boat = $response->object();
 
-                $pc = new ProductController();
-                $product = $pc->getWithSync($boat->of_p_id);
-                if($product == null)
-                    return null;
+                Log::info("Creating boat with external id {$boat->id}");
 
-                Log::info("Creating boat with external id {$boat->of_id}");
-
-                return Boat::create([
-                    'external_id' => $boat->of_id,
-                    'model' => $boat->p_nome,
-                    'product_id' => $product->id,
+                $newBoat = Boat::create([
+                    'external_id' => $boat->id,
+                    'model' => $boat->model,
+                    'ideal_weight' => $boat->ideal_weight,
+                    'finished_weight' => $boat->final_weight,
+                    'finished_at' => $boat->finish_date
                 ]);
+
+                Log::info('Queue boat for full sync');
+                BoatSyncJob::dispatch($newBoat, $boat);
+
+                return $newBoat;
             }else{
                 return null;
             }

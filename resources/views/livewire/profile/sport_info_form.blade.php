@@ -21,8 +21,8 @@ new class extends Component
     public array $selectedGoals = [];
 
     public array $competitive = [
-        ['id' => 1, 'name' => 'Competition'],
-        ['id' => 0, 'name' => 'Non competition'],
+        ['id' => 1, 'name' => 'Racing'],
+        ['id' => 0, 'name' => 'Non racing'],
     ];
 
     //public array $allGoals;

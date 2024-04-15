@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ProductType extends Model
+class PersonType extends Model
 {
+    public $timestamps = false;
+
     protected $fillable = [
-        'id',
         'name',
     ];
 }

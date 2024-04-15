@@ -5,6 +5,7 @@ return [
 
     'emails' => [
       'internal_from' => 'fabrica@nelo.eu',
+      'internal_from_name' => 'My Nelo',
       'admins' => ['nuno.ramos@nelo.eu', 'andre.santos@nelo.eu'],
     ],
 ];

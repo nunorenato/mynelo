@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DisciplineEnum;
+use App\Enums\ProductTypeEnum;
 use App\Models\Product;
 use App\Models\ProductType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -54,23 +56,42 @@ class ProductController extends Controller
         return response()->json();
     }
 
-    public function getWithSync(int $externalID):Product|null
+    public static function getWithSync(int $externalID):Product|null
     {
         return Product::where('external_id', '=', $externalID)->firstOr(function() use ($externalID){
-            $response = Http::get(config('nelo.nelo_api_url')."/product/$externalID");
+            $response = Http::get(config('nelo.nelo_api_url')."/product/v2/$externalID");
             if($response->ok()){
                 $product = $response->object();
 
-                Log::info("Creating product with external id {$product->P_ID}");
+                Log::info("Creating product with external id {$product->id}");
 
-                return Product::create([
-                    'external_id' => $product->P_ID,
+                $type = null;
+                foreach ($product->genealogy as $ancestor){
+                    $type = ProductTypeEnum::fromAPI($ancestor);
+                    if($type != null)
+                        break;
+                }
+                if($type == null){
+                    Log::error('Product Type not mapped: '.$product->type);
+                    return null;
+                }
+
+                $p = Product::create([
+                    'external_id' => $product->id,
                     'name' => $product->name,
-                    'image' => $product->P_IMAGEM,
+                    'product_type_id' => $type,
+                    'discipline_id' => $product->discipline==null?null:DisciplineEnum::fromAPI($product->discipline),
                 ]);
+                if(!empty($product->image)){
+                    $ic = new ImageController();
+                    $p->image()->associate(ImageController::fromURL($product->image, $product->name, 'products'))->save();
+                }
+                return $p;
             }
-            else
+            else{
+                Log::error('Get product API Error', ['P_ID' => $externalID]);
                 return null;
+            }
         });
     }
 }

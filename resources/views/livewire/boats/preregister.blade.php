@@ -20,7 +20,7 @@ new class extends Component {
 
     public string $boatId;
 
-    public string $dealer;
+    public string $seller;
 
     public function save():void{
 
@@ -28,7 +28,7 @@ new class extends Component {
 
         $validated = $this->validate([
             'boatId' => ['required', 'numeric', Rule::unique(BoatRegistration::class, 'boat_id')->where(fn (Builder $query) => $query->where('user_id', $user->id))],
-            'dealer' => ['required', 'numeric'],
+            'seller' => ['required', 'max:250'],
         ],
         [
             'boatId.unique' => 'You have already registered this boat'
@@ -47,11 +47,12 @@ new class extends Component {
             $boatRegistration = BoatRegistration::create([
                 'boat_id' => $boat->id,
                 'user_id' => $user->id,
-                'seller_id' => $validated['dealer'],
+                'seller' => $validated['seller'],
                 'status' => StatusEnum::PENDING,
             ]);
 
-            Mail::to(config('nelo.emails.admins'))->send(new PreRegistrationMail($boatRegistration));
+            Mail::to(config('nelo.emails.admins'))
+                ->queue(new PreRegistrationMail($boatRegistration));
 
             activity()
                 ->on($boatRegistration)
@@ -88,13 +89,9 @@ new class extends Component {
                 <x-mary-button label="Continue" link="boats" class="btn-success" />
             </x-slot:actions>
         @else
-            <x-mary-form wire:submit="save" x-data="{showSeller: false}">
+            <x-mary-form wire:submit="save">
                 <x-mary-input label="Boat ID" wire:model="boatId" />
-                <x-mary-select label="Where did you buy it from" wire:model="dealer" :options="Dealer::orderByRaw('external_id > 0')->orderBy('name')->get()" x-model="showSeller" placeholder="---"></x-mary-select>
-                <div x-show="showSeller == 2">
-                    <x-mary-input label="Seller name" wire:model="seller"></x-mary-input>
-                </div>
-
+                <x-mary-input label="Where did you buy it from" wire:model="seller" hint="Write the name of the dealer or person that sold you the boat"></x-mary-input>
 
                 <x-slot:actions>
                     <x-mary-button label="Cancel" @click="$wire.show = false" />

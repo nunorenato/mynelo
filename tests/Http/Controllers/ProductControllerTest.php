@@ -11,7 +11,7 @@ class ProductControllerTest extends TestCase
     public function testGetWithSync()
     {
         $pc = new ProductController();
-        $p = $pc->getWithSync(42404);
+        $p = ProductController::getWithSync(42404);
         self::assertNotNull($p);
     }
 }

@@ -1,4 +1,3 @@
-
 <x-app-layout>
     <x-mary-header title="Boats" separator>
         <x-slot:actions>
