@@ -160,6 +160,7 @@
         .btn-success a{
             background-color: seagreen;
             border-color: seagreen;
+            color: #fff;
         }
 
         @media all {

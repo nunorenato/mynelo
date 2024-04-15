@@ -23,6 +23,7 @@ class BoatRegistration extends Model
         'paddle_length',
         'status',
         'seller',
+        'hash',
     ];
 
     protected $casts = [

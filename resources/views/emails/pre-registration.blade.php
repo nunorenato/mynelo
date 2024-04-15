@@ -17,7 +17,11 @@
         <dt>Supposed seller</dt>
         <dd>{{ $registration->seller }}</dd>
     </dl>
-    <p><a href="#">Validate</a></p>
-    <p><a href="#">Cancel registration</a></p>
+    <table>
+        <tr>
+            <td class="btn-success"><a href="{{ action([\App\Http\Controllers\BoatRegistrationController::class, 'validateRegistration'], ['boatregistration' => $registration->id, 'hash' => $registration->hash]) }}" class="">Validate</a></td>
+            <td><a href="{{ action([\App\Http\Controllers\BoatRegistrationController::class, 'cancelRegistration'], ['boatregistration' => $registration->id, 'hash' => $registration->hash]) }}">Cancel registration</a></td>
+        </tr>
+    </table>
 </div>
 </x-email-layout>

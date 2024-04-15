@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StatusEnum;
 use App\Models\BoatRegistration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
 
 class BoatRegistrationController extends Controller
 {
@@ -59,4 +62,29 @@ class BoatRegistrationController extends Controller
 
         return response()->json();
     }
+
+    public function validateRegistration(BoatRegistration $boatregistration, $hash):View
+    {
+        return $this->processValidation($boatregistration, $hash,StatusEnum::VALIDATED );
+    }
+    public function cancelRegistration(BoatRegistration $boatregistration, $hash):View
+    {
+        return $this->processValidation($boatregistration, $hash,StatusEnum::CANCELED );
+    }
+
+    private function processValidation(BoatRegistration $boatRegistration, string $hash, StatusEnum $newStatus):View
+    {
+        if(hash('murmur3a', $boatRegistration->boat->external_id) != $hash){
+            return view('livewire.boats.register-approval', ['error' => 'Invalid link']);
+        }
+        if($boatRegistration->status != StatusEnum::PENDING){
+            return view('livewire.boats.register-approval', ['error' => 'Registration was not in the correct status. Already validated ou canceled?']);
+        }
+
+        $boatRegistration->status = $newStatus;
+        $boatRegistration->save();
+
+        return view('livewire.boats.register-approval', ['validated' => $newStatus == StatusEnum::VALIDATED]);
+    }
+
 }

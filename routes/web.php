@@ -43,4 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('testing', [\App\Http\Controllers\TestingController::class, 'index']);
 });
 
+Route::get('/register/validate/{boatregistration}/{hash}', [\App\Http\Controllers\BoatRegistrationController::class, 'validateRegistration']);
+Route::get('/register/cancel/{boatregistration}/{hash}', [\App\Http\Controllers\BoatRegistrationController::class, 'cancelRegistration']);
+
 require __DIR__.'/auth.php';
