@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ProductTypeEnum;
 use App\Jobs\BoatSyncJob;
 use App\Mail\PreRegistrationMail;
+use App\Mail\RegistrationResultMail;
 use App\Models\Attribute;
 use App\Models\Boat;
 use App\Models\BoatRegistration;
@@ -34,8 +35,8 @@ class TestingController extends Controller
   /*      $response = Http::get(config('nelo.nelo_api_url')."/orders/extended/136278");
         BoatSyncJob::dispatch(Boat::find(10), $response->object());*/
 
-        Mail::to(config('nelo.emails.admins'))
-            ->send(new PreRegistrationMail(BoatRegistration::find(2)));
+        Mail::to('nuno.rammos@gmail.com')
+            ->send(new RegistrationResultMail(BoatRegistration::find(2)));
 
         dump('ok');
 

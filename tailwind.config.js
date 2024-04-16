@@ -35,5 +35,11 @@ export default {
                 }
             }
         ]
-    }
+    },
+
+    safelist: [
+        {
+            pattern: /badge.*/,
+        }
+    ]
 };

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enums\StatusEnum;
+use App\Mail\RegistrationResultMail;
 use App\Models\BoatRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class BoatRegistrationController extends Controller
@@ -83,6 +85,8 @@ class BoatRegistrationController extends Controller
 
         $boatRegistration->status = $newStatus;
         $boatRegistration->save();
+
+        Mail::to($boatRegistration->user)->send(new RegistrationResultMail($boatRegistration));
 
         return view('livewire.boats.register-approval', ['validated' => $newStatus == StatusEnum::VALIDATED]);
     }

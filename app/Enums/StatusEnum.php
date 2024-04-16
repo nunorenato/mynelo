@@ -10,6 +10,9 @@ enum StatusEnum:string{
     public function cssClass():string{
         return match($this){
             StatusEnum::PENDING => 'badge-warning',
+            StatusEnum::VALIDATED => 'badge-info',
+            StatusEnum::CANCELED => 'badge-error',
+            StatusEnum::COMPLETE => 'badge-success'
         };
     }
 
