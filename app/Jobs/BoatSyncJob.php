@@ -37,7 +37,7 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
         $product = ProductController::getWithSync($this->extendedJson->model_id);
         if($product != null){
             Log::debug('Got product', $product->toArray());
-            $this->boat->model()->associate($product);
+            $this->boat->product()->associate($product);
         }
         else{
             Log::error("Error getting product");
@@ -105,12 +105,24 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
 
                 if($jsonProduct['attribute']==null)
                     $attr = null;
-                $attr = Attribute::firstWhere('external_id',$jsonProduct['attribute']['id']);
-                if($attr != null)
-                    $attr = $attr->id;
+                else{
+                    $attribute = Attribute::firstWhere('external_id',$jsonProduct['attribute']['id']);
+                    $attr = $attribute->id;
+                }
 
 
                 $this->boat->products()->attach($pFitting->id, ['attribute_id' => $attr]);
+            }
+        }
+
+        /**
+         * CO 2
+         */
+        $response = Http::get(config('nelo.nelo_api_url')."/orders/co2/{$this->boat->external_id}");
+        if($response->ok()) {
+            $co2 = $response->json();
+            if(is_numeric($co2)){
+                $this->boat->co2 = $co2;
             }
         }
 

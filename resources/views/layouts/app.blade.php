@@ -18,6 +18,9 @@
 </head>
 <body class="min-h-screen font-sans antialiased bg-base-200/50 dark:bg-base-200">
 
+<x-mary-toast></x-mary-toast>
+
+
 {{-- NAVBAR mobile only --}}
 <x-mary-nav sticky class="lg:hidden">
     <x-slot:brand>

@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->integer('seat_position')->nullable();
             $table->integer('seat_height')->nullable();
             $table->integer('footrest_id')->nullable();
+            $table->integer('footrest_position')->nullable();
             $table->integer('rudder_id')->nullable();
             $table->string('paddle')->nullable();
             $table->string('paddle_length')->nullable();

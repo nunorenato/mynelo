@@ -39,7 +39,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
    //Volt::route('profile', 'profile.index')->name('profile');
     Route::view('dashboard', 'dashboard')->name('dashboard');
 //    Volt::route('boats', 'boats.index')->name('boats'); TROCAR SE FOR PRECISO DINAMISMO NA PAGINA
+
     Route::view('boats', 'livewire.boats.index')->name('boats');
+    Volt::route('boats/{boatRegistration}', 'boats.show');
+
     Route::get('testing', [\App\Http\Controllers\TestingController::class, 'index']);
 });
 

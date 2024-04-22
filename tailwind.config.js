@@ -38,6 +38,8 @@ export default {
     },
 
     safelist: [
+        'blur-lg',
+        'blur-sm',
         {
             pattern: /badge.*/,
         }

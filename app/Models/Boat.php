@@ -16,13 +16,14 @@ class Boat extends Model
         'ideal_weight',
         'external_id',
         'seller',
+        'co2',
     ];
 
     protected $casts = [
         'finished_at' => 'date',
     ];
 
-    public function model():BelongsTo{
+    public function product():BelongsTo{
         return $this->belongsTo(Product::class, 'product_id');
     }
 
@@ -41,6 +42,10 @@ class Boat extends Model
     }
 
     public function products():BelongsToMany{
-        return $this->belongsToMany(Product::class);
+        return $this->belongsToMany(Product::class)->withPivot('attribute_id');
+    }
+
+    public function discipline():BelongsTo{
+        return $this->belongsTo(Discipline::class);
     }
 }

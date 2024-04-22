@@ -28,7 +28,7 @@ new class extends Component {
     }
 };
 ?>
-<x-mary-table :headers="$headers" :rows="$boats">
+<x-mary-table :headers="$headers" :rows="$boats" link="boats/{id}">
     @scope('cell_status', $row)
     <x-mary-badge :class="$row->status->cssClass()" :value="$row->status->toString()"></x-mary-badge>
     @endscope

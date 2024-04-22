@@ -49,7 +49,7 @@ new class extends Component {
                 'user_id' => $user->id,
                 'seller' => $validated['seller'],
                 'status' => StatusEnum::PENDING,
-                'hash' => hash('murmur3a', $boat->external_id, ['rounds' => 4]),
+                'hash' => hash('murmur3a', $boat->external_id),
             ]);
 
             Mail::to(config('nelo.emails.admins'))
