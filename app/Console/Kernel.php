@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Http\Controllers\DealerController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -19,7 +20,12 @@ class Kernel extends ConsoleKernel
             $dc->sync();
         })
             ->name('Sync Dealers')
-            ->daily();
+            ->weekly();
+
+        $schedule->call(function(){
+            ProductController::updateAll();
+        })->name('Sync products')
+            ->monthly();
     }
 
     /**

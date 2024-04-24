@@ -34,17 +34,39 @@ class TestingController extends Controller
 //       dump(ProductController::getWithSync(42411));
 
 
-        $response = Http::get(config('nelo.nelo_api_url')."/orders/extended/120089");
-        BoatSyncJob::dispatch(Boat::find(12), $response->object());
+//        $response = Http::get(config('nelo.nelo_api_url')."/orders/extended/120089");
+//        BoatSyncJob::dispatch(Boat::find(12), $response->object());
 
 
-    /*    $response = Http::get(config('nelo.nelo_api_url')."/orders/co2/136278");
+/*        $pc = new ProductController();
+        $pc->updateFromAPI(Product::find(45));*/
+
+        $boat = Boat::find(15);
+
+
+
+        $response = Http::get(config('nelo.nelo_api_url')."/orders/fittings/{$boat->external_id}");
         if($response->ok()) {
-            $co2 = $response->json();
-            $b = Boat::find(10);
-            $b->co2 = $co2;
-            $b->save();
-        }*/
+            Log::info('Adding fittings to boat');
+            foreach ($response->json() as $jsonProduct){
+
+                $pFitting = ProductController::getWithSync($jsonProduct['product']['id']);
+                if($pFitting == null){
+                    continue;
+                }
+
+                if($jsonProduct['attribute']==null)
+                    $attr = null;
+                else{
+                    $attribute = Attribute::firstWhere('external_id',$jsonProduct['attribute']['id']);
+                    $attr = $attribute->id;
+                }
+
+                if($pFitting->product_type_id == ProductTypeEnum::Footrest)
+                    $boat->products()->attach($pFitting->id, ['attribute_id' => $attr]);
+
+            }
+        }
 
 
 

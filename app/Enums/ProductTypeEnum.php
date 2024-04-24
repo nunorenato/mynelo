@@ -14,7 +14,7 @@ Enum ProductTypeEnum:int{
     {
         return match($neloId){
           10 => static::Seat,
-          11, 168, 169, 62 => static::Footrest,
+          11, 168, 169, 62, 431, 432, 433 => static::Footrest,
           14 => static::Rudder,
           74 => static::Cover,
           65 => static::NumberHolder,

@@ -7,8 +7,10 @@ use App\Models\Product;
 use App\Models\Boat;
 use App\Models\Discipline;
 use App\Models\Attribute;
+use App\Models\Content;
 use Livewire\Volt\Component;
 use Mary\Traits\Toast;
+
 
 new class extends Component{
     use Toast;
@@ -17,10 +19,14 @@ new class extends Component{
 
     public bool $showSetup = false;
     public bool $deleteModal = false;
+    public bool $showUpgrades = false;
+    public bool $showAbout = false;
 
     public Boat $boat;
     public Product $model;
     public Discipline $discipline;
+
+    public Illuminate\Database\Eloquent\Collection $upgradables;
 
     public ?int $seat_id;
     public ?int $seat_position;
@@ -30,6 +36,8 @@ new class extends Component{
     public ?int $rudder_id;
     public ?string $paddle;
     public ?string $paddle_length;
+
+    public ?Content $layup;
 
     public bool $notComplete = true;
 
@@ -46,7 +54,7 @@ new class extends Component{
 
     public function mount():void
     {
-        Gate::authorize('view', $this->boatRegistration);
+        // Gate::authorize('view', $this->boatRegistration);
 
         $this->boat = $this->boatRegistration->boat;
         $this->model = $this->boat->product;
@@ -70,16 +78,28 @@ new class extends Component{
                 }
             }
         }
+
+        $pos = strripos($this->boat->model, ' ');
+        $layupKey = trim(strtolower(substr($this->boat->model, $pos+1)));
+        $this->layup = Content::where('path', "layups/$layupKey")->first();
     }
 
     public function saveSetup():void
     {
+
 
         $validated = $this->validate();
         //dump($validated);
         $this->boatRegistration->fill($validated);
         $this->boatRegistration->status = \App\Enums\StatusEnum::COMPLETE;
         $this->boatRegistration->save();
+
+        activity()
+            ->on($this->boatRegistration)
+            ->by(Auth::user())
+            ->event('updated')
+            ->withProperties($validated)
+            ->log('Boat registration My Setup update');
 
         $this->showSetup = false;
         $this->notComplete = false;
@@ -89,6 +109,12 @@ new class extends Component{
     {
 
         $this->boatRegistration->delete();
+
+        activity()
+            ->on($this->boatRegistration)
+            ->by(Auth::user())
+            ->event('removed')
+            ->log('Boat registration removed');
 
         $this->deleteModal = false;
         $this->success(
@@ -110,7 +136,15 @@ new class extends Component{
                 return $item;
         });
 
-        //dd($this->boatRegistration->boat);
+        /**
+         * sacar o nome do modelo
+         */
+        $parts = explode(' ', $this->boat->model);
+        // retirar construcao
+        array_pop($parts);
+        // retirar tamanho
+        // TODO validar se é um tamanho
+        array_pop($parts);
 
         return [
             'details' => [
@@ -123,7 +157,17 @@ new class extends Component{
             'fittings' => $products->where('product_type_id', '<>', ProductTypeEnum::Color->value),
             'colors' => $products->where('product_type_id', '=', ProductTypeEnum::Color->value),
             'setupFields' => empty($this->discipline)?[]:$this->discipline->fields,
+            'aboutModel' => Content::where('path', 'model/about/'.strtolower(implode('_', $parts)))->first(),
         ];
+    }
+
+    public function loadUpgrades($id){
+
+        $this->upgradables = $this->model->options()->wherePivot('attribute_id', $id)->get();
+
+        //dump($this->upgradables);
+
+        $this->showUpgrades = true;
     }
 }
 ?>
@@ -150,6 +194,11 @@ new class extends Component{
                     <x-slot:avatar>
                         <x-mary-icon :name="$detail['icon']" class="h-10" />
                     </x-slot:avatar>
+                    @if($detail['sub-value'] == 'Boat model')
+                        <x-slot:actions>
+                            <x-mary-button icon="o-information-circle" class="btn-circle btn-sm" @click="$wire.showAbout = true"></x-mary-button>
+                        </x-slot:actions>
+                    @endif
                 </x-mary-list-item>
             @endforeach
         </x-mary-card>
@@ -166,6 +215,7 @@ new class extends Component{
                     <x-mary-button icon="o-pencil-square" class="btn-circle btn-sm" wire:click="$toggle('showSetup')"></x-mary-button>
                 </x-slot:menu>
                 @isset($discipline)
+                    <div class="lg:grid lg:grid-cols-2 lg:gap-3">
                     @foreach($discipline->fields as $field)
                         @switch(FieldEnum::from($field->id))
                             @case(FieldEnum::Seat)
@@ -244,6 +294,7 @@ new class extends Component{
 
                         @endswitch
                     @endforeach
+                    </div>
                 @endisset
             @endif
         </x-mary-card>
@@ -253,21 +304,25 @@ new class extends Component{
             @foreach($fittings as $product)
                 <x-mary-list-item :item="$product" sub-value="attribute.name" avatar="image.path">
                     <x-slot:actions>
-                        <x-mary-button label="Upgrade"></x-mary-button>
+                        @isset($product->attribute)
+                        <x-mary-button label="Upgrade" wire:click="loadUpgrades({{ $product->attribute->id }})" spinner></x-mary-button>
+                        @endisset
                     </x-slot:actions>
                 </x-mary-list-item>
             @endforeach
-            @if(!empty($boatRegistration->boat->evaluator))
+            @isset($boatRegistration->boat->evaluator)
                 <div class="mt-10">
                     <x-mary-avatar :title="$boatRegistration->boat->evaluator->name" subtitle="Quality control" :image="$boatRegistration->boat->evaluator->image->path" class="!w-14"></x-mary-avatar>
                 </div>
-            @endif
+            @endisset
         </x-mary-card>
 
         <!-- DESIGN -->
         <x-mary-card title="Design" @class(['blur-sm' => $notComplete])>
             @foreach($colors as $product)
-                <x-mary-list-item :item="$product" sub-value="attribute.name" avatar="image.path"></x-mary-list-item>
+                <x-mary-list-item :item="$product" sub-value="attribute.name">
+                    <x-slot:avatar><div style="background-color: {{ $product->attributes['hex']??'#ffffff' }};" class="w-11 h-11 rounded-full"></div></x-slot:avatar>
+                </x-mary-list-item>
             @endforeach
                 @if(!empty($boatRegistration->boat->painter))
                     <div class="mt-10">
@@ -278,7 +333,10 @@ new class extends Component{
 
         <!-- LAYUP -->
         <x-mary-card title="Layup" @class(['blur-sm' => $notComplete])>
-            <p>Descrição da construção (WIP)</p>
+            @isset($layup)
+                <h2>{{ $layup->title }}</h2>
+                <p>{{ $layup->content }}</p>
+            @endisset
             @if(!empty($boatRegistration->boat->layuper))
                 <div class="mt-10">
                     <x-mary-avatar :title="$boatRegistration->boat->layuper->name" subtitle="Layup" :image="$boatRegistration->boat->layuper->image->path" class="!w-14"></x-mary-avatar>
@@ -286,36 +344,13 @@ new class extends Component{
             @endif
         </x-mary-card>
     </div>
-    @php /*
-    <x-mary-tabs selected="details-tab">
-        <x-mary-tab name="details-tab" label="Boat details" icon="o-information-circle">
-            <div></div>
-        </x-mary-tab>
-        <x-mary-tab name="setup-tab" label="My setup" icon="o-cog-6-tooth">
-            <div>
-            </div>
-        </x-mary-tab>
-        <x-mary-tab name="fittings-tab" label="Fittings" icon="tabler.artboard">
-            <div>
-            </div>
-        </x-mary-tab>
-        <x-mary-tab name="design-tab" label="Design" icon="tabler.spray">
-            <div>
 
-            </div>
-        </x-mary-tab>
-        <x-mary-tab name="layup-tab" label="Layup" icon="carbon.carbon">
-            <div>
-            </div>
-        </x-mary-tab>
-    </x-mary-tabs>
-    */ @endphp
     <x-mary-drawer wire:model="showSetup" right class="w-11/12 lg:w-1/3">
         <x-mary-form wire:submit="saveSetup">
             @foreach($setupFields as $field)
                 @switch(FieldEnum::from($field->id))
                     @case(FieldEnum::Seat)
-                        <x-mary-select label="Seat" wire:model="seat_id" :options="Product::where('product_type_id', ProductTypeEnum::Seat)->get()" placeholder="---"></x-mary-select>
+                        <x-mary-select label="Seat" wire:model="seat_id" :options="$model->options()->where('product_type_id', ProductTypeEnum::Seat)->get()" placeholder="---"></x-mary-select>
                         @break
 
                     @case(FieldEnum::SeatPosition)
@@ -328,7 +363,7 @@ new class extends Component{
                         @break
 
                     @case(FieldEnum::Footrest)
-                        <x-mary-select label="Footrest" wire:model="footrest_id" :options="Product::where('product_type_id', ProductTypeEnum::Footrest)->get()" placeholder="---"></x-mary-select>
+                        <x-mary-select label="Footrest" wire:model="footrest_id" :options="$model->options()->where('product_type_id', ProductTypeEnum::Footrest)->get()" placeholder="---"></x-mary-select>
                         @break
 
                     @case(FieldEnum::FootrestPosition)
@@ -337,7 +372,7 @@ new class extends Component{
                         @break
 
                     @case(FieldEnum::Rudder)
-                        <x-mary-select label="Rudder" wire:model="rudder_id" :options="Product::where('product_type_id', ProductTypeEnum::Rudder)->get()" placeholder="---"></x-mary-select>
+                        <x-mary-select label="Rudder" wire:model="rudder_id" :options="$model->options()->where('product_type_id', ProductTypeEnum::Rudder)->get()" placeholder="---"></x-mary-select>
                         @break
 
                     @case(FieldEnum::Paddle)
@@ -357,6 +392,22 @@ new class extends Component{
         </x-mary-form>
     </x-mary-drawer>
 
+    <x-mary-drawer wire:model="showUpgrades" title="Available upgrades" right class="w-11/12 lg:w-1/3">
+        @isset($upgradables)
+            @foreach($upgradables as $option)
+                <x-mary-list-item :item="$option" avatar="image.path">
+                    <x-slot:subValue>{!! $option->description !!}</x-slot:subValue>
+                    <x-slot:actions>
+                        <x-mary-button label="Buy" :link="config('nelo.shop.base_product_url').$option->external_id" external></x-mary-button>
+                    </x-slot:actions>
+                </x-mary-list-item>
+            @endforeach
+        @endisset
+            <x-slot:actions>
+                <x-mary-button label="Close" @click="$wire.showUpgrades = false"></x-mary-button>
+            </x-slot:actions>
+    </x-mary-drawer>
+
     <x-mary-modal wire:model="deleteModal" title="Confirm removal">
         <div>Are you sure you wish to delete this boat from your list?</div>
         <x-slot:actions>
@@ -364,4 +415,11 @@ new class extends Component{
             <x-mary-button label="Cancel" @click="$wire.deleteModal = false"></x-mary-button>
         </x-slot:actions>
     </x-mary-modal>
+
+    <x-mary-drawer wire:model="showAbout" title="About this model" right class="w-11/12 lg:w-1/2">
+        {!! $aboutModel->content !!}
+        <x-slot:actions>
+            <x-mary-button title="Close" @click="$wire.showAbout = false"></x-mary-button>
+        </x-slot:actions>
+    </x-mary-drawer>
 </div>

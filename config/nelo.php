@@ -6,7 +6,11 @@ return [
     'emails' => [
       'internal_from' => 'fabrica@nelo.eu',
       'from_name' => 'My Nelo',
-      'admins' => ['nuno.rammos@gmail.com', /*'nuno.ramos@nelo.eu', 'andre.santos@nelo.eu'*/],
+      'admins' => ['nuno.ramos@nelo.eu', 'andre.santos@nelo.eu'],
       'external_from' => 'noreply@nelo.eu',
     ],
+
+    'shop' => [
+        'base_product_url' => 'https://paddle-lab.com/catalogsearch/result/?q=',
+    ]
 ];

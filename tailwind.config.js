@@ -20,6 +20,7 @@ export default {
 
     plugins: [
 		forms,
+        require("@tailwindcss/typography"),
 		require("daisyui")
 	],
 
@@ -40,6 +41,7 @@ export default {
     safelist: [
         'blur-lg',
         'blur-sm',
+        'p-0',
         {
             pattern: /badge.*/,
         }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
@@ -13,7 +14,9 @@ class Product extends Model
         'external_id',
         'product_type_id',
         'discipline_id',
+        'attributes',
         'attributes->hex',
+        'description',
     ];
 
     protected $casts = [
@@ -34,5 +37,11 @@ class Product extends Model
 
     public function image():BelongsTo{
         return $this->belongsTo(Image::class);
+    }
+
+    public function options():BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_options','main_product_id', 'sub_product_id')
+            ->withPivot(['attribute_id', 'standard']);
     }
 }

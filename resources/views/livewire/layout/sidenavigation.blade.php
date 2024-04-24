@@ -22,7 +22,7 @@
             <x-mary-menu-separator />
         @endif
 
-        <x-mary-menu-item title="Home" icon="o-home" link="dashboard" />
+        <x-mary-menu-item title="Home" icon="o-home" :link="route('dashboard')" />
         <x-mary-menu-item title="Boats" icon="tabler.kayak" :link="route('boats')" />
         @php /*
         <x-mary-menu-sub title="Settings" icon="o-cog-6-tooth">
