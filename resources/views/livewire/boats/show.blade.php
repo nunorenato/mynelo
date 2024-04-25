@@ -194,7 +194,7 @@ new class extends Component{
                     <x-slot:avatar>
                         <x-mary-icon :name="$detail['icon']" class="h-10" />
                     </x-slot:avatar>
-                    @if($detail['sub-value'] == 'Boat model')
+                    @if($detail['sub-value'] == 'Boat model' && isset($aboutModel))
                         <x-slot:actions>
                             <x-mary-button icon="o-information-circle" class="btn-circle btn-sm" @click="$wire.showAbout = true"></x-mary-button>
                         </x-slot:actions>
@@ -417,7 +417,9 @@ new class extends Component{
     </x-mary-modal>
 
     <x-mary-drawer wire:model="showAbout" title="About this model" right class="w-11/12 lg:w-1/2">
+        @isset($aboutModel)
         {!! $aboutModel->content !!}
+        @endisset
         <x-slot:actions>
             <x-mary-button title="Close" @click="$wire.showAbout = false"></x-mary-button>
         </x-slot:actions>

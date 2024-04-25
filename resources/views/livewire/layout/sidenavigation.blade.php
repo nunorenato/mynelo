@@ -1,3 +1,19 @@
+<?php
+use Livewire\Volt\Component;
+use Livewire\Attributes\On;
+
+new class extends Component{
+
+    public bool $showFeedback = false;
+
+    #[On('feedback-sent')]
+    public function closeFeedback()
+    {
+        $this->showFeedback = false;
+    }
+
+}
+?>
 <nav>
     <x-mary-menu activate-by-route>
 
@@ -24,6 +40,8 @@
 
         <x-mary-menu-item title="Home" icon="o-home" :link="route('dashboard')" />
         <x-mary-menu-item title="Boats" icon="tabler.kayak" :link="route('boats')" />
+        <x-mary-menu-separator />
+        <x-mary-menu-item title="Feedback" icon="o-chat-bubble-bottom-center-text" @click="$wire.showFeedback = true"></x-mary-menu-item>
         @php /*
         <x-mary-menu-sub title="Settings" icon="o-cog-6-tooth">
             <x-mary-menu-item title="Wifi" icon="o-wifi" link="####" />
@@ -31,5 +49,14 @@
         </x-mary-menu-sub>
         */ @endphp
     </x-mary-menu>
+    <template x-teleport="body">
+        <x-mary-modal wire:model="showFeedback" title="Send us your feedback">
+            <livewire:components.feedback>
 
+                    <x-mary-button label="close" @click="$wire.showFeedback = false"></x-mary-button>
+
+            </livewire:components.feedback>
+        </x-mary-modal>
+    </template>
 </nav>
+
