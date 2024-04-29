@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use PhpParser\JsonDecoder;
+use function Laravel\Prompts\error;
 
 class TestingController extends Controller
 {
@@ -41,32 +42,7 @@ class TestingController extends Controller
 /*        $pc = new ProductController();
         $pc->updateFromAPI(Product::find(45));*/
 
-        $boat = Boat::find(15);
-
-
-
-        $response = Http::get(config('nelo.nelo_api_url')."/orders/fittings/{$boat->external_id}");
-        if($response->ok()) {
-            Log::info('Adding fittings to boat');
-            foreach ($response->json() as $jsonProduct){
-
-                $pFitting = ProductController::getWithSync($jsonProduct['product']['id']);
-                if($pFitting == null){
-                    continue;
-                }
-
-                if($jsonProduct['attribute']==null)
-                    $attr = null;
-                else{
-                    $attribute = Attribute::firstWhere('external_id',$jsonProduct['attribute']['id']);
-                    $attr = $attribute->id;
-                }
-
-                if($pFitting->product_type_id == ProductTypeEnum::Footrest)
-                    $boat->products()->attach($pFitting->id, ['attribute_id' => $attr]);
-
-            }
-        }
+        Log::error('teste');
 
 
 

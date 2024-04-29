@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-mary-header title="Dashboard" separator></x-mary-header>
 
-    <x-mary-card title="Welcome" separator>
+    <x-mary-card title="Welcome" separator class="mb-5">
         <p>Welcome to My Nelo. This will be your hub for your Nelo products and services.</p>
         <p>We will continually be introducing new features and options to this platform, so stay in touch.</p>
     </x-mary-card>

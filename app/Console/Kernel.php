@@ -15,17 +15,17 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->call(function(){
+      /*  $schedule->call(function(){
             $dc = new DealerController();
             $dc->sync();
         })
             ->name('Sync Dealers')
-            ->weekly();
+            ->weekly();*/
 
         $schedule->call(function(){
             ProductController::updateAll();
         })->name('Sync products')
-            ->monthly();
+            ->weekly();
     }
 
     /**
