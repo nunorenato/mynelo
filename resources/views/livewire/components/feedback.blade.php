@@ -42,7 +42,10 @@ new class extends Component{
 ?>
 <div>
     <x-mary-form wire:submit="sendFeedback">
-        <x-mary-textarea wire:model="feedbackText" label="Feedback" rows="5" placeholder="Tell us about your experience with this site, with Nelo, our products and services"></x-mary-textarea>
+        <x-mary-textarea wire:model="feedbackText" label="Feedback" rows="3" placeholder="Tell us about your experience with this site, with Nelo, our products and services"></x-mary-textarea>
+        <label for="rating" class="pt-0 label label-text font-semibold">
+            <span>How do you rate your boat</span>
+        </label>
         <div class="rating">
             @for($i=1;$i<6;$i++)
                 <input type="radio" name="rating" value="{{ $i }}" wire:model="rating" class="mask mask-star bg-orange-400" {{ $i==$rating?'checked':'' }} />
@@ -51,7 +54,7 @@ new class extends Component{
                 <div class="text-red-500 label-text-alt p-1">{{ $message }}</div>
             @enderror
         </div>
-        <x-mary-textarea wire:model="whyText" label="Tell us why" rows="3" placeholder=""></x-mary-textarea>
+        <x-mary-textarea wire:model="whyText" label="Tell us why" rows="2" placeholder=""></x-mary-textarea>
         <x-slot:actions>
             <x-mary-button label="Send" type="submit" class="btn-primary" spinner></x-mary-button>
 

@@ -185,7 +185,15 @@ new class extends Component{
         </x-slot:actions>
     </x-mary-header>
 
+    @if($boatRegistration->boat->has('images'))
     <x-mary-image-gallery :images="$boatRegistration->boat->images->pluck('path')->toArray()" class="h-40 rounded-box mb-5"></x-mary-image-gallery>
+    @endif
+
+    <div class="mb-5 gap-5">
+        <x-mary-button label="Boat care" icon="o-wrench-screwdriver" class="btn-lg btn-secondary"></x-mary-button>
+        <x-mary-button label="Move this boat" icon="o-truck" link="https://moveyourboat.paddle-lab.com" class="btn-lg btn-secondary" external></x-mary-button>
+    </div>
+
     <div class="grid lg:grid-cols-3 gap-5">
         <!-- BOAT DETAILS -->
         <x-mary-card title="Boat details" @class(['blur-sm' => $notComplete])>
@@ -421,7 +429,7 @@ new class extends Component{
         {!! $aboutModel->content !!}
         @endisset
         <x-slot:actions>
-            <x-mary-button title="Close" @click="$wire.showAbout = false"></x-mary-button>
+            <x-mary-button label="Close" @click="$wire.showAbout = false"></x-mary-button>
         </x-slot:actions>
     </x-mary-drawer>
 </div>
