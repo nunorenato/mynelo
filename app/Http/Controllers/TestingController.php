@@ -35,8 +35,9 @@ class TestingController extends Controller
 //       dump(ProductController::getWithSync(42411));
 
 
-        $response = Http::get(config('nelo.nelo_api_url')."/orders/extended/136014");
-        BoatSyncJob::dispatch(Boat::find(17), $response->object());
+        $response = Http::get(config('nelo.nelo_api_url')."/product/v2/34254");
+       // BoatSyncJob::dispatch(Boat::find(17), $response->object());
+        Product::createFromJSON($response->object());
 
 
 /*        $pc = new ProductController();

@@ -19,6 +19,7 @@
         "ryangjchandler/blade-tabler-icons": "^2.3",
         "spatie/laravel-activitylog": "^4.7",
         "spatie/laravel-backup": "^8.6",
+        "spatie/laravel-medialibrary": "^11.4",
         "spatie/laravel-permission": "^6.7"
     },
     "require-dev": {

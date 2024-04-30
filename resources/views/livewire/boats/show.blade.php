@@ -126,7 +126,6 @@ new class extends Component{
     public function with():array{
 
         $products = $this->boatRegistration->boat->products()
-            ->with('image')
             ->get()
             ->transform(function(Product $item, $key){
             //dump($item->pivot);
@@ -146,6 +145,11 @@ new class extends Component{
         // TODO validar se é um tamanho
         array_pop($parts);
 
+        $boatMedia = [];
+        foreach($this->boat->getMedia('*') as $media){
+            $boatMedia[] = $media->getUrl();
+        }
+
         return [
             'details' => [
                 ['name' => $this->boat->external_id, 'sub-value' => 'Boat ID','icon' => 'o-finger-print'],
@@ -158,6 +162,7 @@ new class extends Component{
             'colors' => $products->where('product_type_id', '=', ProductTypeEnum::Color->value),
             'setupFields' => empty($this->discipline)?[]:$this->discipline->fields,
             'aboutModel' => Content::where('path', 'model/about/'.strtolower(implode('_', $parts)))->first(),
+            'boatMedia' => $boatMedia,
         ];
     }
 
@@ -186,7 +191,7 @@ new class extends Component{
     </x-mary-header>
 
     @isset($boatRegistration->boat->images)
-    <x-mary-image-gallery :images="$boatRegistration->boat->images->pluck('path')->toArray()" class="h-40 rounded-box mb-5"></x-mary-image-gallery>
+    <x-mary-image-gallery :images="$boatMedia" class="h-40 rounded-box mb-5"></x-mary-image-gallery>
     @endisset
 
     <div class="mb-5 gap-5">
@@ -228,8 +233,9 @@ new class extends Component{
                         @switch(FieldEnum::from($field->id))
                             @case(FieldEnum::Seat)
                                 @isset($boatRegistration->seat)
-                                    <x-mary-list-item :item="$boatRegistration->seat" avatar="image.path">
+                                    <x-mary-list-item :item="$boatRegistration->seat">
                                         <x-slot:sub-value>Seat</x-slot:sub-value>
+                                        <x-slot:avatar><x-mary-avatar :image="$boatRegistration->seat->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
                                 @break
@@ -254,8 +260,9 @@ new class extends Component{
 
                             @case(FieldEnum::Footrest)
                                 @isset($boatRegistration->footrest)
-                                    <x-mary-list-item :item="$boatRegistration->footrest" avatar="image.path">
+                                    <x-mary-list-item :item="$boatRegistration->footrest">
                                         <x-slot:sub-value>Rudder</x-slot:sub-value>
+                                        <x-slot:avatar><x-mary-avatar :image="$boatRegistration->footrest->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 
@@ -273,8 +280,9 @@ new class extends Component{
                             @case(FieldEnum::Rudder)
 
                                 @isset($boatRegistration->rudder)
-                                    <x-mary-list-item :item="$boatRegistration->rudder" avatar="image.path">
+                                    <x-mary-list-item :item="$boatRegistration->rudder">
                                         <x-slot:sub-value>Rudder</x-slot:sub-value>
+                                        <x-slot:avatar><x-mary-avatar :image="$boatRegistration->rudder->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 
@@ -310,7 +318,8 @@ new class extends Component{
         <!-- FITTINGS -->
         <x-mary-card title="Fittings" @class(['blur-sm' => $notComplete])>
             @foreach($fittings as $product)
-                <x-mary-list-item :item="$product" sub-value="attribute.name" avatar="image.path">
+                <x-mary-list-item :item="$product" sub-value="attribute.name">
+                    <x-slot:avatar><x-mary-avatar :image="$product->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
                     <x-slot:actions>
                         @isset($product->attribute)
                         <x-mary-button label="Upgrade" wire:click="loadUpgrades({{ $product->attribute->id }})" spinner></x-mary-button>
@@ -320,7 +329,7 @@ new class extends Component{
             @endforeach
             @isset($boatRegistration->boat->evaluator)
                 <div class="mt-10">
-                    <x-mary-avatar :title="$boatRegistration->boat->evaluator->name" subtitle="Quality control" :image="$boatRegistration->boat->evaluator->image->path" class="!w-14"></x-mary-avatar>
+                    <x-mary-avatar :title="$boatRegistration->boat->evaluator->name" subtitle="Quality control" :image="$boatRegistration->boat->evaluator->photo" class="!w-14"></x-mary-avatar>
                 </div>
             @endisset
         </x-mary-card>
@@ -334,7 +343,7 @@ new class extends Component{
             @endforeach
                 @if(!empty($boatRegistration->boat->painter))
                     <div class="mt-10">
-                        <x-mary-avatar :title="$boatRegistration->boat->painter->name" subtitle="Painter" :image="$boatRegistration->boat->painter->image->path" class="!w-14"></x-mary-avatar>
+                        <x-mary-avatar :title="$boatRegistration->boat->painter->name" subtitle="Painter" :image="$boatRegistration->boat->painter->photo" class="!w-14"></x-mary-avatar>
                     </div>
                 @endif
         </x-mary-card>
@@ -347,7 +356,7 @@ new class extends Component{
             @endisset
             @if(!empty($boatRegistration->boat->layuper))
                 <div class="mt-10">
-                    <x-mary-avatar :title="$boatRegistration->boat->layuper->name" subtitle="Layup" :image="$boatRegistration->boat->layuper->image->path" class="!w-14"></x-mary-avatar>
+                    <x-mary-avatar :title="$boatRegistration->boat->layuper->name" subtitle="Layup" :image="$boatRegistration->boat->layuper->photo" class="!w-14"></x-mary-avatar>
                 </div>
             @endif
         </x-mary-card>
@@ -403,8 +412,9 @@ new class extends Component{
     <x-mary-drawer wire:model="showUpgrades" title="Available upgrades" right class="w-11/12 lg:w-1/3">
         @isset($upgradables)
             @foreach($upgradables as $option)
-                <x-mary-list-item :item="$option" avatar="image.path">
+                <x-mary-list-item :item="$option">
                     <x-slot:subValue>{!! $option->description !!}</x-slot:subValue>
+                    <x-slot:avatar><x-mary-avatar :image="$option->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
                     <x-slot:actions>
                         <x-mary-button label="Buy" :link="config('nelo.shop.base_product_url').$option->external_id" external></x-mary-button>
                     </x-slot:actions>

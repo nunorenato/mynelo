@@ -17,6 +17,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileCannotBeAdded;
 
 class BoatSyncJob implements ShouldQueue, ShouldBeUnique
 {
@@ -66,7 +67,13 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
             Log::info('Adding images to boat');
             $images = $response->json();
             foreach ($images as $image){
-                $this->boat->images()->attach(ImageController::fromURL($image['url'], $image['name'], 'boats'));
+                //$this->boat->images()->attach(ImageController::fromURL($image['url'], $image['name'], 'boats'));
+                try{
+                    $this->boat->addMediaFromUrl($image['url'])->toMediaCollection('boats');
+                }
+                catch(FileCannotBeAdded $fcbae){
+                    Log::error("File could not be added {$image['url']}", [$fcbae->getMessage()]);
+                }
             }
         }
 

@@ -7,9 +7,13 @@ use App\Http\Controllers\ImageController;
 use App\Models\Person;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileCannotBeAdded;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Worker extends Person
+class Worker extends Person implements HasMedia
 {
+    use InteractsWithMedia;
 
     protected $attributes = [
         'person_type_id' => PersonTypeEnum::Worker,
@@ -28,14 +32,19 @@ class Worker extends Person
                 Log::debug("Got funcionario ", ['json' => $worker]);
                 Log::info("Creating worker with external id {$worker->id}");
 
-                $ic = new ImageController();
-                $photo = ImageController::fromURL($worker->photo, $worker->name, 'people');
-
                 $w = new Worker();
                 $w->external_id = $worker->id;
                 $w->name = $worker->name;
-                $w->photo()->associate($photo);
                 $w->save();
+
+                if(!empty($worker->photo)){
+                    try{
+                        $w->addMediaFromUrl($worker->photo)->toMediaCollection('people');
+                    }
+                    catch(FileCannotBeAdded $fcbae){
+                        Log::error("File could not be added {$worker->photo}", [$fcbae->getMessage()]);
+                    }
+                }
 
                 return $w;
             }

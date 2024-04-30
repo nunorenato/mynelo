@@ -5,15 +5,19 @@ namespace App\Models;
 use App\Enums\DisciplineEnum;
 use App\Enums\ProductTypeEnum;
 use App\Http\Controllers\ImageController;
-use App\Http\Controllers\ProductController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileCannotBeAdded;
 
-class Product extends Model
+class Product extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
     protected $fillable = [
         'name',
         'image',
@@ -41,8 +45,11 @@ class Product extends Model
         return $this->belongsTo(Discipline::class);
     }
 
-    public function image():BelongsTo{
-        return $this->belongsTo(Image::class);
+    public function __get($key){
+        if($key == 'image')
+            return $this->getFirstMediaUrl('*');
+        else
+            return parent::__get($key);
     }
 
     public function options():BelongsToMany
@@ -65,7 +72,9 @@ class Product extends Model
         });
     }
 
-    public static function createFromJSON($product){
+    public static function createFromJSON(object $product){
+
+        ///dd($product);
 
         Log::info("Creating product with external id {$product->id}");
 
@@ -88,7 +97,13 @@ class Product extends Model
         ]);
 
         if(!empty($product->image)){
-            $p->image()->associate(ImageController::fromURL($product->image, $product->name, 'products'))->save();
+            //$p->image()->associate(ImageController::fromURL($product->image, $product->name, 'products'))->save();
+            try{
+                $p->addMediaFromUrl($product->image)->toMediaCollection('products');
+            }
+            catch(FileCannotBeAdded $fcbae){
+                Log::error("File could not be added {$product->image}", [$fcbae->getMessage()]);
+            }
         }
 
         if($type == ProductTypeEnum::Boat){
@@ -108,11 +123,19 @@ class Product extends Model
 
             $this->name = $extProduct->name;
             $this->description = empty($extProduct->description)?null:$extProduct->description;
-            if(!empty($extProduct->color))
-                $this->attributes = ['hex' => $extProduct->color];
+            if(!empty($extProduct->color)) {
+                $this->fill([
+                    'attributes' => ['hex' => $extProduct->color]
+                ]);
+            }
 
-            if(empty($this->image) && !empty($extProduct->image)){
-                $this->image()->associate(ImageController::fromURL($extProduct->image, $this->name, 'products'))->save();
+            if(!$this->hasMedia('*') && !empty($extProduct->image)){
+                try{
+                    $this->addMediaFromUrl($extProduct->image)->toMediaCollection('products');
+                }
+                catch(FileCannotBeAdded $fcbae){
+                    Log::error("File could not be added {$extProduct->image}", [$fcbae->getMessage()]);
+                }
             }
             $this->save();
         }
