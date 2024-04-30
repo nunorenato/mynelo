@@ -185,9 +185,9 @@ new class extends Component{
         </x-slot:actions>
     </x-mary-header>
 
-    @if($boatRegistration->boat->has('images'))
+    @isset($boatRegistration->boat->images)
     <x-mary-image-gallery :images="$boatRegistration->boat->images->pluck('path')->toArray()" class="h-40 rounded-box mb-5"></x-mary-image-gallery>
-    @endif
+    @endisset
 
     <div class="mb-5 gap-5">
         <x-mary-button label="Boat care" icon="o-wrench-screwdriver" class="btn-lg btn-secondary"></x-mary-button>

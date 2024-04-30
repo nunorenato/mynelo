@@ -4,12 +4,11 @@ namespace App\Jobs;
 
 use App\Enums\ProductTypeEnum;
 use App\Http\Controllers\ImageController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\WorkerController;
 use App\Models\Attribute;
 use App\Models\Boat;
 use App\Models\Image;
 use App\Models\Product;
+use App\Models\Worker;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -34,30 +33,29 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
         /**
          * Modelo do barco
          */
-        $product = ProductController::getWithSync($this->extendedJson->model_id);
+        $product = Product::getWithSync($this->extendedJson->model_id);
         if($product != null){
             Log::debug('Got product', $product->toArray());
             $this->boat->product()->associate($product);
         }
         else{
-            Log::error("Error getting product");
+            Log::error("Error getting product for boat OF {$this->boat->external_id}");
         }
 
         /**
          * Operadores do barco
          */
-        $wc = new WorkerController();
         if(!empty($this->extendedJson->pintor)){
             Log::info("Painter {$this->extendedJson->pintor->name}");
-            $this->boat->painter()->associate($wc->getWithSync($this->extendedJson->pintor->id))->save();
+            $this->boat->painter()->associate(Worker::getWithSync($this->extendedJson->pintor->id))->save();
         }
         if(!empty($this->extendedJson->laminador)){
             Log::info("Layup {$this->extendedJson->laminador->name}");
-            $this->boat->layuper()->associate($wc->getWithSync($this->extendedJson->laminador->id))->save();
+            $this->boat->layuper()->associate(Worker::getWithSync($this->extendedJson->laminador->id))->save();
         }
-        if(!empty($this->extendedJson->pintor)){
+        if(!empty($this->extendedJson->avaliador)){
             Log::info("Finish {$this->extendedJson->avaliador->name}");
-            $this->boat->evaluator()->associate($wc->getWithSync($this->extendedJson->avaliador->id))->save();
+            $this->boat->evaluator()->associate(Worker::getWithSync($this->extendedJson->avaliador->id))->save();
         }
 
         /**
@@ -99,7 +97,7 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
             Log::info('Adding fittings to boat');
             foreach ($response->json() as $jsonProduct){
 
-                $pFitting = ProductController::getWithSync($jsonProduct['product']['id']);
+                $pFitting = Product::getWithSync($jsonProduct['product']['id']);
                 if($pFitting == null)
                     continue;
 

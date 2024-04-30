@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Jobs\BoatSyncJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Boat extends Model
 {
@@ -47,5 +50,33 @@ class Boat extends Model
 
     public function discipline():BelongsTo{
         return $this->belongsTo(Discipline::class);
+    }
+
+    public static function getWithSync(int $externalID):Boat|null
+    {
+        return Boat::where('external_id', '=', $externalID)->firstOr(function() use ($externalID){
+            $response = Http::get(config('nelo.nelo_api_url')."/orders/extended/$externalID");
+            if($response->ok()){
+
+                $boat = $response->object();
+
+                Log::info("Creating boat with external id {$boat->id}");
+
+                $newBoat = Boat::create([
+                    'external_id' => $boat->id,
+                    'model' => $boat->model,
+                    'ideal_weight' => $boat->ideal_weight,
+                    'finished_weight' => $boat->final_weight,
+                    'finished_at' => $boat->finish_date
+                ]);
+
+                Log::info('Queue boat for full sync');
+                BoatSyncJob::dispatch($newBoat, $boat);
+
+                return $newBoat;
+            }else{
+                return null;
+            }
+        });
     }
 }
