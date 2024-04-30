@@ -20,7 +20,7 @@ new class extends Component{
     public bool $showSetup = false;
     public bool $deleteModal = false;
     public bool $showUpgrades = false;
-    public bool $showAbout = false;
+    public bool $showContent = false;
 
     public Boat $boat;
     public Product $model;
@@ -38,6 +38,7 @@ new class extends Component{
     public ?string $paddle_length;
 
     public ?Content $layup;
+    public ?Content $selectedContent;
 
     public bool $notComplete = true;
 
@@ -174,6 +175,11 @@ new class extends Component{
 
         $this->showUpgrades = true;
     }
+
+    public function loadContent(Content $content){
+        $this->showContent = true;
+        $this->selectedContent = $content;
+    }
 }
 ?>
 <div>
@@ -186,7 +192,7 @@ new class extends Component{
 
     <x-mary-header title="{{$boatRegistration->boat->model}}">
         <x-slot:actions>
-            <x-mary-button label="Remove boat" icon="o-trash" class="btn-error" @click="$wire.deleteModal = true"></x-mary-button>
+            <x-mary-button label="Remove boat" icon="o-trash" class="btn-error" click="$wire.deleteModal = true"></x-mary-button>
         </x-slot:actions>
     </x-mary-header>
 
@@ -209,7 +215,7 @@ new class extends Component{
                     </x-slot:avatar>
                     @if($detail['sub-value'] == 'Boat model' && isset($aboutModel))
                         <x-slot:actions>
-                            <x-mary-button icon="o-information-circle" class="btn-circle btn-sm" @click="$wire.showAbout = true"></x-mary-button>
+                            <x-mary-button icon="o-information-circle" class="btn-circle btn-sm" @click="$wire.loadContent({{ $aboutModel->id }})"></x-mary-button>
                         </x-slot:actions>
                     @endif
                 </x-mary-list-item>
@@ -351,8 +357,7 @@ new class extends Component{
         <!-- LAYUP -->
         <x-mary-card title="Layup" @class(['blur-sm' => $notComplete])>
             @isset($layup)
-                <h2>{{ $layup->title }}</h2>
-                <p>{{ $layup->content }}</p>
+                <x-basic-content :content="$layup"></x-basic-content>
             @endisset
             @if(!empty($boatRegistration->boat->layuper))
                 <div class="mt-10">
@@ -434,12 +439,12 @@ new class extends Component{
         </x-slot:actions>
     </x-mary-modal>
 
-    <x-mary-drawer wire:model="showAbout" title="About this model" right class="w-11/12 lg:w-1/2">
-        @isset($aboutModel)
-        {!! $aboutModel->content !!}
+    <x-mary-drawer wire:model="showContent" title="About this model" right class="w-11/12 lg:w-1/2">
+        @isset($selectedContent)
+            <x-basic-content :content="$selectedContent" no-title></x-basic-content>
         @endisset
         <x-slot:actions>
-            <x-mary-button label="Close" @click="$wire.showAbout = false"></x-mary-button>
+            <x-mary-button label="Close" @click="$wire.showContent = false"></x-mary-button>
         </x-slot:actions>
     </x-mary-drawer>
 </div>
