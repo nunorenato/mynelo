@@ -3,10 +3,8 @@
 namespace App\Jobs;
 
 use App\Enums\ProductTypeEnum;
-use App\Http\Controllers\ImageController;
 use App\Models\Attribute;
 use App\Models\Boat;
-use App\Models\Image;
 use App\Models\Product;
 use App\Models\Worker;
 use Illuminate\Bus\Queueable;

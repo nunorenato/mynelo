@@ -42,6 +42,11 @@ new class extends Component{
         <x-mary-menu-item title="Boats" icon="tabler.kayak" :link="route('boats')" />
         <x-mary-menu-separator />
         <x-mary-menu-item title="Feedback" icon="o-chat-bubble-bottom-center-text" @click="$wire.showFeedback = true"></x-mary-menu-item>
+        @if(Auth::user()->hasRole(Spatie\Permission\Models\Role::findByName('Admin')))
+        <x-mary-menu-separator />
+        <x-mary-menu-item title="Admin" icon="o-bolt" link="/admin"></x-mary-menu-item>
+        @endif
+
         @php /*
         <x-mary-menu-sub title="Settings" icon="o-cog-6-tooth">
             <x-mary-menu-item title="Wifi" icon="o-wifi" link="####" />

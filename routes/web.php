@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('boats/{boatRegistration}', 'boats.show')->name('boats.show');
 
     Route::get('testing', [\App\Http\Controllers\TestingController::class, 'index']);
+    Route::get('retry_sync/{boatRegistration}', [\App\Http\Controllers\BoatRegistrationController::class, 'retrySync']);
 });
 
 Route::get('/register/validate/{boatregistration}/{hash}', [\App\Http\Controllers\BoatRegistrationController::class, 'validateRegistration']);

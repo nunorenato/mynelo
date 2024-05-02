@@ -46,10 +46,8 @@ class TestingController extends Controller
 
      //   Log::error('teste');
 
-        $registration = BoatRegistration::find(2);
-        $other = $registration->boat->registrations()->where('id', '<>', $registration->id)->whereNotIn('status', [StatusEnum::CANCELED])->get();
 
-        dump($other);
+        Product::getWithSync(28333);
 
         dump('ok');
 

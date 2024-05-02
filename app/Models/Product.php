@@ -85,7 +85,7 @@ class Product extends Model implements HasMedia
                 break;
         }
         if($type == null){
-            Log::error('Product Type not mapped: '.$product->type, $product);
+            Log::error('Product Type not mapped: '.$product->type, (array) $product);
             return null;
         }
 

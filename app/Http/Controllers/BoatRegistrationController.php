@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\StatusEnum;
+use App\Jobs\BoatSyncJob;
 use App\Mail\RegistrationResultMail;
 use App\Models\BoatRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
@@ -96,6 +98,16 @@ class BoatRegistrationController extends Controller
         Mail::to($boatRegistration->user)->send(new RegistrationResultMail($boatRegistration));
 
         return view('livewire.boats.register-approval', ['validated' => $newStatus == StatusEnum::VALIDATED]);
+    }
+
+    public function retrySync(BoatRegistration $boatRegistration){
+        //dd($boatRegistration->boat->external_id);
+        $response = Http::get(config('nelo.nelo_api_url')."/orders/extended/{$boatRegistration->boat->external_id}");
+        if($response->ok()) {
+            $boat = $response->object();
+            dump($boat);
+            BoatSyncJob::dispatch($boatRegistration->boat, $boat);
+        }
     }
 
 }
