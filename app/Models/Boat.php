@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\StatusEnum;
 use App\Jobs\BoatSyncJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
@@ -56,6 +58,10 @@ class Boat extends Model implements HasMedia
         return $this->belongsTo(Discipline::class);
     }
 
+    public function registrations():HasMany{
+        return $this->hasMany(BoatRegistration::class);
+    }
+
     public static function getWithSync(int $externalID):Boat|null
     {
         return Boat::where('external_id', '=', $externalID)->firstOr(function() use ($externalID){
@@ -82,5 +88,11 @@ class Boat extends Model implements HasMedia
                 return null;
             }
         });
+    }
+
+    public function deletePreviousOwners(int $newRegistrationId){
+        $this->registrations()
+            ->where('id', '<>', $newRegistrationId)
+            ->delete();
     }
 }

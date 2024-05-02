@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Livewire\Volt\Volt;
+use Illuminate\Support\Facades\Blade;
 
 class VoltServiceProvider extends ServiceProvider
 {

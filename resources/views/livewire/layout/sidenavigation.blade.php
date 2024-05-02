@@ -52,9 +52,7 @@ new class extends Component{
     <template x-teleport="body">
         <x-mary-modal wire:model="showFeedback" title="Send us your feedback">
             <livewire:components.feedback>
-
                     <x-mary-button label="close" @click="$wire.showFeedback = false"></x-mary-button>
-
             </livewire:components.feedback>
         </x-mary-modal>
     </template>

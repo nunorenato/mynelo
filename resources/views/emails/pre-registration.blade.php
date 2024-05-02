@@ -17,6 +17,14 @@
         <dt>Supposed seller</dt>
         <dd>{{ $registration->seller }}</dd>
     </dl>
+    @isset($previousOwners)
+        <h2>Previous registrations</h2>
+        <ul>
+            @foreach($previousOwners as $owner)
+                <li>{{$owner->user->name}} ({{$owner->created_at}})</li>
+            @endforeach
+        </ul>
+    @endisset
     <table>
         <tr>
             <td class="btn-success"><a href="{{ action([\App\Http\Controllers\BoatRegistrationController::class, 'validateRegistration'], ['boatregistration' => $registration->id, 'hash' => $registration->hash]) }}" class="">Validate</a></td>

@@ -83,6 +83,13 @@ class BoatRegistrationController extends Controller
             return view('livewire.boats.register-approval', ['error' => 'Registration was not in the correct status. Already validated ou canceled?']);
         }
 
+        /**
+         * Update other registrations for this boat
+         */
+        if($newStatus == StatusEnum::VALIDATED){
+            $boatRegistration->boat->deletePreviousOwners($boatRegistration->id);
+        }
+
         $boatRegistration->status = $newStatus;
         $boatRegistration->save();
 

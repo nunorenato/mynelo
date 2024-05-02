@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\FieldEnum;
 use App\Enums\ProductTypeEnum;
+use App\Enums\StatusEnum;
 use App\Jobs\BoatSyncJob;
 use App\Mail\PreRegistrationMail;
 use App\Mail\RegistrationResultMail;
@@ -35,9 +36,9 @@ class TestingController extends Controller
 //       dump(ProductController::getWithSync(42411));
 
 
-        $response = Http::get(config('nelo.nelo_api_url')."/product/v2/34254");
+        //$response = Http::get(config('nelo.nelo_api_url')."/product/v2/34254");
        // BoatSyncJob::dispatch(Boat::find(17), $response->object());
-        Product::createFromJSON($response->object());
+        //Product::createFromJSON($response->object());
 
 
 /*        $pc = new ProductController();
@@ -45,7 +46,10 @@ class TestingController extends Controller
 
      //   Log::error('teste');
 
+        $registration = BoatRegistration::find(2);
+        $other = $registration->boat->registrations()->where('id', '<>', $registration->id)->whereNotIn('status', [StatusEnum::CANCELED])->get();
 
+        dump($other);
 
         dump('ok');
 

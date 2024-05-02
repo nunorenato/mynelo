@@ -22,6 +22,7 @@ Enum DisciplineEnum:int{
             170 => static::Expedition,
             241 => static::Marathon,
             242 => static::Fitness,
+            388 => static::Touring,
         };
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Mail;
 
+use App\Enums\StatusEnum;
 use App\Models\BoatRegistration;
 use Illuminate\Bus\Queueable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
@@ -14,8 +16,15 @@ class PreRegistrationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public ?Collection $previousOwners;
+
     public function __construct(public BoatRegistration $registration)
     {
+        $this->previousOwners = $registration->boat->registrations()
+            ->withTrashed()
+            ->where('id', '<>', $registration->id)
+            ->whereNotIn('status', [StatusEnum::CANCELED])
+            ->get();
     }
 
     public function envelope(): Envelope
