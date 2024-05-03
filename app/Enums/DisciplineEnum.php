@@ -14,15 +14,14 @@ Enum DisciplineEnum:int{
 
     public static function fromAPI(int $neloId){
         return match($neloId){
-            149 => static::Sprint,
-            151 => static::Ocean,
+            149, 210 => static::Sprint,
+            151, 278 => static::Ocean,
             152 => static::Slalom,
-            153 => static::Touring,
+            153,388 => static::Touring,
             //162 => rowing
             170 => static::Expedition,
             241 => static::Marathon,
             242 => static::Fitness,
-            388 => static::Touring,
         };
     }
 }

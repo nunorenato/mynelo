@@ -17,4 +17,9 @@ class Content extends Model
     {
         return $this->belongsTo(Image::class);
     }
+
+    public static function findByPath(string $path)
+    {
+        return self::where('path', $path)->first();
+    }
 }

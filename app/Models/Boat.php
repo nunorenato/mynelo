@@ -39,15 +39,17 @@ class Boat extends Model implements HasMedia
     public function painter():BelongsTo{
         return $this->belongsTo(Worker::class, 'painter_id');
     }
+
     public function layuper():BelongsTo{
         return $this->belongsTo(Worker::class, 'layuper_id');
     }
+
     public function evaluator():BelongsTo{
         return $this->belongsTo(Worker::class, 'evaluator_id');
     }
 
-    public function images():BelongsToMany{
-        return $this->belongsToMany(Image::class);
+    public function assembler():BelongsTo{
+        return $this->belongsTo(Worker::class, 'montador_id');
     }
 
     public function products():BelongsToMany{

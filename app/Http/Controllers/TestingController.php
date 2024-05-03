@@ -13,6 +13,7 @@ use App\Models\Boat;
 use App\Models\BoatRegistration;
 use App\Models\Product;
 use App\Models\ProductType;
+use App\Models\Worker;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -47,7 +48,9 @@ class TestingController extends Controller
      //   Log::error('teste');
 
 
-        Product::getWithSync(28333);
+        //Product::getWithSync(28333);
+
+        Boat::find(10)->assembler()->associate(Worker::getWithSync(24866))->save();
 
         dump('ok');
 

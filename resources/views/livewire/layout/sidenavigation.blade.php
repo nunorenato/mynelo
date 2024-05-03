@@ -40,6 +40,8 @@ new class extends Component{
 
         <x-mary-menu-item title="Home" icon="o-home" :link="route('dashboard')" />
         <x-mary-menu-item title="Boats" icon="tabler.kayak" :link="route('boats')" />
+        <x-mary-menu-item title="Paddle Lab" icon="o-shopping-bag" :link="route('paddle-lab')" />
+        <x-mary-menu-item title="Nelo Coach" icon="o-device-phone-mobile" :link="route('coach')" />
         <x-mary-menu-separator />
         <x-mary-menu-item title="Feedback" icon="o-chat-bubble-bottom-center-text" @click="$wire.showFeedback = true"></x-mary-menu-item>
         @if(Auth::user()->hasRole(Spatie\Permission\Models\Role::findByName('Admin')))

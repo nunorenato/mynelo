@@ -158,6 +158,7 @@ new class extends Component{
                 ['name' => substr($this->boat->finished_at, 0, 10), 'sub-value' => 'Finished date', 'icon' => 'o-calendar'],
                 ['name' => $this->boat->finished_weight, 'sub-value' => 'Final weight (kg)', 'icon' => 'o-scale'],
                 ['name' => $this->boat->co2, 'sub-value' => 'Carbon footprint (kg co2 eq.)', 'icon' => 'carbon.carbon-accounting'],
+                ['name' => '€€€€.€€', 'sub-value' => 'Market value', 'icon' => 'o-banknotes'],
             ],
             'fittings' => $products->where('product_type_id', '<>', ProductTypeEnum::Color->value),
             'colors' => $products->where('product_type_id', '=', ProductTypeEnum::Color->value),
@@ -200,9 +201,11 @@ new class extends Component{
     <x-mary-image-gallery :images="$boatMedia" class="h-40 rounded-box mb-5"></x-mary-image-gallery>
     @endisset
 
-    <div class="mb-5 gap-5">
-        <x-mary-button label="Boat care" icon="o-wrench-screwdriver" class="btn-lg btn-secondary"></x-mary-button>
+    <div class="mb-5 gap-5 {{ $notComplete?'blur-sm':'' }}">
+        <x-mary-button label="Boat care" icon="o-wrench-screwdriver" class="btn-lg btn-secondary" wire:click="loadContent({{ Content::findByPath('boatcare')->id }})" spinner></x-mary-button>
         <x-mary-button label="Move this boat" icon="o-truck" link="https://moveyourboat.paddle-lab.com" class="btn-lg btn-secondary" external></x-mary-button>
+        <x-mary-button label="Repair" icon="o-wrench-screwdriver" class="btn-lg btn-secondary"></x-mary-button>
+        <x-mary-button label="Sell" icon="o-currency-euro" class="btn-lg btn-secondary" wire:click="loadContent({{ Content::findByPath('sell')->id }})" spinner></x-mary-button>
     </div>
 
     <div class="grid lg:grid-cols-3 gap-5">
@@ -215,7 +218,12 @@ new class extends Component{
                     </x-slot:avatar>
                     @if($detail['sub-value'] == 'Boat model' && isset($aboutModel))
                         <x-slot:actions>
-                            <x-mary-button icon="o-information-circle" class="btn-circle btn-sm" @click="$wire.loadContent({{ $aboutModel->id }})"></x-mary-button>
+                            <x-mary-button icon="o-information-circle" class="btn-circle btn-sm" wire:click="loadContent({{ $aboutModel->id }})" spinner></x-mary-button>
+                        </x-slot:actions>
+                    @endif
+                    @if($detail['sub-value'] == 'Market value')
+                        <x-slot:actions>
+                            <x-mary-button icon="o-information-circle" class="btn-circle btn-sm" wire:click="loadContent({{ Content::findByPath('marketvalue')->id }})" spinner></x-mary-button>
                         </x-slot:actions>
                     @endif
                 </x-mary-list-item>
@@ -333,6 +341,11 @@ new class extends Component{
                     </x-slot:actions>
                 </x-mary-list-item>
             @endforeach
+            @isset($boatRegistration->boat->assembler)
+                <div class="mt-10">
+                    <x-mary-avatar :title="$boatRegistration->boat->assembler->name" subtitle="Assembly" :image="$boatRegistration->boat->assembler->photo" class="!w-14"></x-mary-avatar>
+                </div>
+            @endisset
             @isset($boatRegistration->boat->evaluator)
                 <div class="mt-10">
                     <x-mary-avatar :title="$boatRegistration->boat->evaluator->name" subtitle="Quality control" :image="$boatRegistration->boat->evaluator->photo" class="!w-14"></x-mary-avatar>

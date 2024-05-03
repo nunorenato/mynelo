@@ -56,6 +56,10 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
             Log::info("Finish {$this->extendedJson->avaliador->name}");
             $this->boat->evaluator()->associate(Worker::getWithSync($this->extendedJson->avaliador->id))->save();
         }
+        if(!empty($this->extendedJson->montador)){
+            Log::info("Assembly {$this->extendedJson->montador->name}");
+            $this->boat->assembler()->associate(Worker::getWithSync($this->extendedJson->montador->id))->save();
+        }
 
         /**
          * Imagens

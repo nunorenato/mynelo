@@ -43,6 +43,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('boats', 'livewire.boats.index')->name('boats');
     Volt::route('boats/{boatRegistration}', 'boats.show')->name('boats.show');
 
+    Route::view('paddle-lab', 'livewire.paddlelab.index')->name('paddle-lab');
+
+    Route::view('coach', 'livewire.coach.index')->name('coach');
+
     Route::get('testing', [\App\Http\Controllers\TestingController::class, 'index']);
     Route::get('retry_sync/{boatRegistration}', [\App\Http\Controllers\BoatRegistrationController::class, 'retrySync']);
 });
