@@ -17,6 +17,6 @@ class BoatRegistrationPolicy
     }
 
     public function view(User $user, BoatRegistration $boatRegistration):bool{
-        return $boatRegistration->user_id == $user->id;
+        return $boatRegistration->user_id == $user->id || $user->isAdmin();
     }
 }

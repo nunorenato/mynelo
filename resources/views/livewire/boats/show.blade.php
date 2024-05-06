@@ -55,7 +55,7 @@ new class extends Component{
 
     public function mount():void
     {
-        // Gate::authorize('view', $this->boatRegistration);
+        Gate::authorize('view', $this->boatRegistration);
 
         $this->boat = $this->boatRegistration->boat;
         $this->model = $this->boat->product;

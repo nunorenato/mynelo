@@ -44,7 +44,7 @@ new class extends Component{
         <x-mary-menu-item title="Nelo Coach" icon="o-device-phone-mobile" :link="route('coach')" />
         <x-mary-menu-separator />
         <x-mary-menu-item title="Feedback" icon="o-chat-bubble-bottom-center-text" @click="$wire.showFeedback = true"></x-mary-menu-item>
-        @if(Auth::user()->hasRole(Spatie\Permission\Models\Role::findByName('Admin')))
+        @if(Auth::user()->isAdmin())
         <x-mary-menu-separator />
         <x-mary-menu-item title="Admin" icon="o-bolt" link="/admin"></x-mary-menu-item>
         @endif

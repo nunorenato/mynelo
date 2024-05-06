@@ -5,7 +5,7 @@
         <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn">
         <tbody>
         <tr>
-            <td> <a href="#" target="_blank">Finish registration</a> </td>
+            <td> <a href="{{ config('app.url') }}" target="_blank">Finish registration</a> </td>
         </tr>
         </tbody>
         </table>
