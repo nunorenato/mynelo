@@ -80,6 +80,10 @@ class Product extends Model implements HasMedia
 
         $type = null;
         foreach ($product->genealogy as $ancestor){
+
+            if(ProductTypeEnum::isIgnorable($ancestor))
+                return null;
+
             $type = ProductTypeEnum::fromAPI($ancestor);
             if($type != null)
                 break;
@@ -97,7 +101,6 @@ class Product extends Model implements HasMedia
         ]);
 
         if(!empty($product->image)){
-            //$p->image()->associate(ImageController::fromURL($product->image, $product->name, 'products'))->save();
             try{
                 $p->addMediaFromUrl($product->image)->toMediaCollection('products');
             }

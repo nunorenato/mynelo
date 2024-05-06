@@ -22,4 +22,10 @@ Enum ProductTypeEnum:int{
             default => null,
         };
     }
+
+    public static function isIgnorable(int $neloId){
+        $ignorables = [134, 135];
+
+        return in_array($neloId, $ignorables);
+    }
 }
