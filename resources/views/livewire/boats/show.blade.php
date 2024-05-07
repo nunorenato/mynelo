@@ -216,9 +216,9 @@ new class extends Component{
         </x-slot:actions>
     </x-mary-header>
 
-    @isset($boatRegistration->boat->images)
+    @if(count($boatMedia) > 0)
     <x-mary-image-gallery :images="$boatMedia" class="h-40 rounded-box mb-5"></x-mary-image-gallery>
-    @endisset
+    @endif
 
     <div class="mb-5 gap-5 {{ $notComplete?'blur-sm':'' }}">
         <x-mary-button label="Boat care" icon="o-wrench-screwdriver" class="btn-lg btn-secondary" wire:click="loadContent({{ Content::findByPath('boatcare')->id }})" spinner></x-mary-button>
