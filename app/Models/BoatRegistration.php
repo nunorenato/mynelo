@@ -26,6 +26,7 @@ class BoatRegistration extends Model
         'status',
         'seller',
         'hash',
+        'voucher',
     ];
 
     protected $casts = [

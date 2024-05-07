@@ -22,6 +22,7 @@ new class extends Component {
     public string $boatId;
 
     public string $seller;
+    public ?string $voucher;
 
     public function save(): void
     {
@@ -31,6 +32,7 @@ new class extends Component {
         $validated = $this->validate([
             'boatId' => ['required', 'numeric', Rule::unique(BoatRegistration::class, 'boat_id')->where(fn(Builder $query) => $query->where('user_id', $user->id))],
             'seller' => ['required', 'max:250'],
+            'voucher' => ['max:50', 'nullable'],
         ],
             [
                 'boatId.unique' => 'You have already registered this boat'
@@ -49,6 +51,7 @@ new class extends Component {
                 'boat_id' => $boat->id,
                 'user_id' => $user->id,
                 'seller' => $validated['seller'],
+                'voucher' => $validated['voucher'],
                 'status' => StatusEnum::PENDING,
                 'hash' => hash('murmur3a', $boat->external_id),
             ]);
@@ -93,9 +96,10 @@ new class extends Component {
                 </x-slot:actions>
             @else
                 <x-mary-form wire:submit="save">
-                    <x-mary-input label="Boat ID" wire:model="boatId"/>
+                    <x-mary-input label="Boat ID" wire:model="boatId" required/>
                     <x-mary-input label="Where did you buy it from" wire:model="seller"
-                                  hint="Write the name of the dealer or person that sold you the boat"></x-mary-input>
+                                  hint="Write the name of the dealer or person that sold you the boat" required></x-mary-input>
+                    <x-mary-input label="Do you have a voucher code?" wire:model="voucher" hint="If you are pre-registering your boat, you can ask your dealer for a voucher code to access extra benefits."></x-mary-input>
 
                     <x-slot:actions>
                         <x-mary-button label="Cancel" @click="$wire.show = false"/>

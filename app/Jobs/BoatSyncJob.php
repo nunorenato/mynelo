@@ -21,42 +21,64 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(private readonly Boat $boat, private readonly object $extendedJson)
+    public function __construct(private readonly Boat $boat, private object|int $extendedJson)
     {
     }
 
     public function handle(): void
     {
+
+        if(is_int($this->extendedJson)){
+            $response = Http::get(config('nelo.nelo_api_url')."/orders/extended/{$this->extendedJson}");
+            if($response->ok()) {
+                $this->extendedJson = $response->object();
+            }
+            else{
+                return;
+            }
+        }
+
         Log::info("Processing boat sync {$this->boat->external_id}");
+
+        /**
+         * Detalhes do barco
+         */
+        $this->boat->fill([
+            'finished_at' => $this->extendedJson->finish_date??null,
+            'finished_weight' => $this->extendedJson->final_weight??null,
+            'voucher_used' => $this->extendedJson->voucher_used,
+        ]);
 
         /**
          * Modelo do barco
          */
-        $product = Product::getWithSync($this->extendedJson->model_id);
-        if($product != null){
-            Log::debug('Got product', $product->toArray());
-            $this->boat->product()->associate($product);
-        }
-        else{
-            Log::error("Error getting product for boat OF {$this->boat->external_id}");
+        if(empty($this->boat->product_id)){
+            $product = Product::getWithSync($this->extendedJson->model_id);
+            if($product != null){
+                Log::debug('Got product', $product->toArray());
+                $this->boat->product()->associate($product);
+            }
+            else{
+                Log::error("Error getting product for boat OF {$this->boat->external_id}");
+            }
         }
 
         /**
          * Operadores do barco
          */
-        if(!empty($this->extendedJson->pintor)){
+        if(empty($this->boat->painter_id) && !empty($this->extendedJson->pintor)){
             Log::info("Painter {$this->extendedJson->pintor->name}");
             $this->boat->painter()->associate(Worker::getWithSync($this->extendedJson->pintor->id))->save();
         }
-        if(!empty($this->extendedJson->laminador)){
+        if(empty($this->boat->layuper_id) && !empty($this->extendedJson->laminador)){
             Log::info("Layup {$this->extendedJson->laminador->name}");
             $this->boat->layuper()->associate(Worker::getWithSync($this->extendedJson->laminador->id))->save();
         }
-        if(!empty($this->extendedJson->avaliador)){
+        if(empty($this->boat->evaluator_id) && !empty($this->extendedJson->avaliador)){
             Log::info("Finish {$this->extendedJson->avaliador->name}");
             $this->boat->evaluator()->associate(Worker::getWithSync($this->extendedJson->avaliador->id))->save();
         }
-        if(!empty($this->extendedJson->montador)){
+        if(empty($this->boat->montador_id) && !empty($this->extendedJson->montador)){
             Log::info("Assembly {$this->extendedJson->montador->name}");
             $this->boat->assembler()->associate(Worker::getWithSync($this->extendedJson->montador->id))->save();
         }
@@ -67,14 +89,18 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
         $response = Http::get(config('nelo.nelo_api_url')."/orders/images/{$this->boat->external_id}");
         if($response->ok()){
             Log::info('Adding images to boat');
+
+            $currentImages = $this->boat->getMedia('*');
+
             $images = $response->json();
             foreach ($images as $image){
-                //$this->boat->images()->attach(ImageController::fromURL($image['url'], $image['name'], 'boats'));
-                try{
-                    $this->boat->addMediaFromUrl($image['url'])->toMediaCollection('boats');
-                }
-                catch(FileCannotBeAdded $fcbae){
-                    Log::error("File could not be added {$image['url']}", [$fcbae->getMessage()]);
+                if($currentImages->doesntContain('file_name', basename($image['url']))){
+                    try{
+                        $this->boat->addMediaFromUrl($image['url'])->toMediaCollection('boats');
+                    }
+                    catch(FileCannotBeAdded $fcbae){
+                        Log::error("File could not be added {$image['url']}", [$fcbae->getMessage()]);
+                    }
                 }
             }
         }
@@ -85,6 +111,10 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
         $response = Http::get(config('nelo.nelo_api_url')."/orders/colors/{$this->boat->external_id}");
         if($response->ok()) {
             Log::info('Adding colors to boat');
+
+            // apagamos sempre as cores
+            $this->boat->products()->where('product_type_id', '=', ProductTypeEnum::Color->value)->detach();
+
             foreach ($response->json() as $jsonColor){
                 $pColor = Product::firstOrCreate([
                     'external_id' => $jsonColor['color']['id'],
@@ -104,6 +134,9 @@ class BoatSyncJob implements ShouldQueue, ShouldBeUnique
         $response = Http::get(config('nelo.nelo_api_url')."/orders/fittings/{$this->boat->external_id}");
         if($response->ok()) {
             Log::info('Adding fittings to boat');
+
+            // apagamos todos os fittings
+            $this->boat->products()->where('product_type_id', '<>', ProductTypeEnum::Color->value)->detach();
             foreach ($response->json() as $jsonProduct){
 
                 $pFitting = Product::getWithSync($jsonProduct['product']['id']);

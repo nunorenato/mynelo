@@ -36,6 +36,7 @@ new class extends Component{
     public ?int $rudder_id;
     public ?string $paddle;
     public ?string $paddle_length;
+    public ?string $voucher;
 
     public ?Content $layup;
     public ?Content $selectedContent;
@@ -71,6 +72,7 @@ new class extends Component{
         $this->rudder_id = $this->boatRegistration->rudder_id;
         $this->paddle = $this->boatRegistration->paddle;
         $this->paddle_length = $this->boatRegistration->paddle_length;
+        $this->voucher = $this->boatRegistration->voucher;
 
         if(!empty($this->discipline)){
             foreach ($this->discipline->fields as $field){
@@ -104,6 +106,10 @@ new class extends Component{
 
         $this->showSetup = false;
         $this->notComplete = false;
+    }
+
+    public function saveVoucher():void{
+        $this->boatRegistration->voucher = $this->voucher;
     }
 
     public function removeBoat():void
@@ -151,20 +157,33 @@ new class extends Component{
             $boatMedia[] = $media->getUrl();
         }
 
+        $details = [
+            ['name' => $this->boat->external_id, 'sub-value' => 'Boat ID','icon' => 'o-finger-print'],
+            ['name' => $this->boat->model, 'sub-value' => 'Boat model', 'icon' => 'o-cube-transparent'],
+        ];
+
+        if(!empty($this->boat->finished_at))
+            $details[] = ['name' => substr($this->boat->finished_at, 0, 10), 'sub-value' => 'Finished date', 'icon' => 'o-calendar'];
+        if(is_numeric($this->boat->finished_weight))
+            $details[] = ['name' => $this->boat->finished_weight, 'sub-value' => 'Final weight (kg)', 'icon' => 'o-scale', 'class' => $this->notComplete?'blur-sm':null];
+        if(is_numeric($this->boat->co2))
+            $details[] = ['name' => $this->boat->co2, 'sub-value' => 'Carbon footprint (kg co2 eq.)', 'icon' => 'carbon.carbon-accounting', 'class' => $this->notComplete?'blur-sm':null];
+        $details[] = ['name' => '€€€€.€€', 'sub-value' => 'Market value', 'icon' => 'o-banknotes', 'class' => $this->notComplete?'blur-sm':null];
+
         return [
-            'details' => [
-                ['name' => $this->boat->external_id, 'sub-value' => 'Boat ID','icon' => 'o-finger-print'],
-                ['name' => $this->boat->model, 'sub-value' => 'Boat model', 'icon' => 'o-cube-transparent'],
-                ['name' => substr($this->boat->finished_at, 0, 10), 'sub-value' => 'Finished date', 'icon' => 'o-calendar'],
-                ['name' => $this->boat->finished_weight, 'sub-value' => 'Final weight (kg)', 'icon' => 'o-scale'],
-                ['name' => $this->boat->co2, 'sub-value' => 'Carbon footprint (kg co2 eq.)', 'icon' => 'carbon.carbon-accounting'],
-                ['name' => '€€€€.€€', 'sub-value' => 'Market value', 'icon' => 'o-banknotes'],
-            ],
+            'details' => $details,
             'fittings' => $products->where('product_type_id', '<>', ProductTypeEnum::Color->value),
             'colors' => $products->where('product_type_id', '=', ProductTypeEnum::Color->value),
             'setupFields' => empty($this->discipline)?[]:$this->discipline->fields,
             'aboutModel' => Content::where('path', 'model/about/'.strtolower(implode('_', $parts)))->first(),
             'boatMedia' => $boatMedia,
+            'voucherQueryString' => Arr::query([
+                'mynelo' => 1,
+                'wpf18625_1' => $this->boatRegistration->voucher,
+                'wpf18625_2' => $this->boat->external_id,
+                'email' => $this->boatRegistration->user->email,
+                'owner' => $this->boatRegistration->user->name,
+            ]),
         ];
     }
 
@@ -210,9 +229,9 @@ new class extends Component{
 
     <div class="grid lg:grid-cols-3 gap-5">
         <!-- BOAT DETAILS -->
-        <x-mary-card title="Boat details" @class(['blur-sm' => $notComplete])>
+        <x-mary-card title="Boat details">
             @foreach($details as $detail)
-                <x-mary-list-item :item="$detail" sub-value="sub-value">
+                <x-mary-list-item :item="$detail" sub-value="sub-value" class="{{ $detail['class']??'' }}">
                     <x-slot:avatar>
                         <x-mary-icon :name="$detail['icon']" class="h-10" />
                     </x-slot:avatar>
@@ -231,11 +250,30 @@ new class extends Component{
         </x-mary-card>
 
         <!-- MY SETUP -->
-        <x-mary-card class="col-span-2" title="My setup">
+        <x-mary-card class="lg:col-span-2" title="My setup">
             @if($boatRegistration->status == \App\Enums\StatusEnum::VALIDATED)
-                <div class="align-middle items-center">
-                    <h2>Please complete your boat registration</h2>
-                    <x-mary-button label="Finish registration" @click="$wire.showSetup = true"></x-mary-button>
+                <div class="align-middle self-center space-y-3">
+                    @if(empty($boat->finished_at))
+                        <p>Your boat is yet not finished. As soon as that happens, you will have access to all the details and features.</p>
+                        @if(!$boat->voucher_used)
+                            <p>By pre-registering with your voucher code you can have access to some extra goodies.</p>
+                            @if(empty($boatRegistration->voucher))
+                                <p>You will need a voucher code to complete this operation. Please request one to your dealer.</p>
+                                <x-mary-form wire:submit="saveVoucher" class="lg:w-1/3">
+                                    <x-mary-input label="Voucher code" wire:model="voucher" inline>
+                                        <x-slot:append>
+                                            <x-mary-button label="Send" type="submit" spinner icon="o-paper-airplane"></x-mary-button>
+                                        </x-slot:append>
+                                    </x-mary-input>
+                                </x-mary-form>
+                            @else
+                                <x-mary-button label="Get my goodies" icon="o-sparkles" link="https://www.nelo.eu/pre-registration-options/?{{ $voucherQueryString }}" external></x-mary-button>
+                            @endif
+                        @endif
+                    @else
+                        <h2 class="mb-3">Please complete your boat registration</h2>
+                        <x-mary-button label="Finish registration" icon="o-adjustments-horizontal" @click="$wire.showSetup = true"></x-mary-button>
+                    @endif
                 </div>
             @else
                 <x-slot:menu>

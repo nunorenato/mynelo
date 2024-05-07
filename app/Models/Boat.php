@@ -26,10 +26,12 @@ class Boat extends Model implements HasMedia
         'external_id',
         'seller',
         'co2',
+        'voucher_used',
     ];
 
     protected $casts = [
         'finished_at' => 'date',
+        'vouched_used' => 'boolean'
     ];
 
     public function product():BelongsTo{

@@ -3,6 +3,8 @@
 namespace App\Console;
 
 use App\Http\Controllers\DealerController;
+use App\Jobs\BoatSyncJob;
+use App\Models\Boat;
 use App\Models\Product;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -26,6 +28,14 @@ class Kernel extends ConsoleKernel
             Product::updateAll();
         })->name('Sync products')
             ->weekly();
+
+        $schedule->call(function(){
+            foreach (Boat::whereNull('finished_at')->get() as $boat){
+                BoatSyncJob::dispatch($boat, $boat->external_id);
+            }
+        })
+            ->name('update unfinished')
+            ->dailyAt('02:00');
     }
 
     /**
