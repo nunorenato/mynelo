@@ -33,9 +33,10 @@ class Kernel extends ConsoleKernel
             foreach (Boat::whereNull('finished_at')->get() as $boat){
                 BoatSyncJob::dispatch($boat, $boat->external_id);
             }
-        })
-            ->name('update unfinished')
+        })->name('update unfinished')
             ->dailyAt('02:00');
+
+        $schedule->command('model:prune')->daily();
     }
 
     /**

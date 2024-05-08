@@ -203,6 +203,8 @@ new class extends Component{
 }
 ?>
 <div>
+@section('title'){{ $boatRegistration->boat->model }}@endsection
+
 @push('head')
     {{-- PhotoSwipe --}}
     <script src="https://cdn.jsdelivr.net/npm/photoswipe@5.4.3/dist/umd/photoswipe.umd.min.js"></script>
@@ -212,7 +214,7 @@ new class extends Component{
 
     <x-mary-header title="{{$boatRegistration->boat->model}}">
         <x-slot:actions>
-            <x-mary-button label="Remove boat" icon="o-trash" class="btn-error" click="$wire.deleteModal = true"></x-mary-button>
+            <x-mary-button label="Remove boat" icon="o-trash" class="btn-error" wire:click="$dispatch('showDelete')" spinner></x-mary-button>
         </x-slot:actions>
     </x-mary-header>
 
@@ -482,13 +484,7 @@ new class extends Component{
             </x-slot:actions>
     </x-mary-drawer>
 
-    <x-mary-modal wire:model="deleteModal" title="Confirm removal">
-        <div>Are you sure you wish to delete this boat from your list?</div>
-        <x-slot:actions>
-            <x-mary-button label="Delete" wire:click="removeBoat" class="btn-error" spinner></x-mary-button>
-            <x-mary-button label="Cancel" @click="$wire.deleteModal = false"></x-mary-button>
-        </x-slot:actions>
-    </x-mary-modal>
+    <livewire:boats.delete :boat_registration="$boatRegistration"></livewire:boats.delete>
 
     <x-mary-drawer wire:model="showContent" title="About this model" right class="w-11/12 lg:w-1/2">
         @isset($selectedContent)

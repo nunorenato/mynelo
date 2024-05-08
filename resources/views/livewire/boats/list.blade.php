@@ -8,6 +8,8 @@ use Illuminate\Support\Collection;
 
 new class extends Component {
 
+    public BoatRegistration $selectedRegistration;
+
     public function boats():Collection{
         return Auth::user()->boats()->with('boat')->get();
     }
@@ -19,6 +21,12 @@ new class extends Component {
             ['key' => 'boat.model', 'label' => 'Model'],
             ['key' => 'status', 'label' => 'Status'],
         ];
+    }
+
+    public function delete(BoatRegistration $registration)
+    {
+        $this->selectedRegistration = $registration;
+        $this->dispatch('showDelete');
     }
 
     public function with():array{
@@ -37,22 +45,29 @@ new class extends Component {
     }
 };
 ?>
-<x-mary-table :headers="$headers" :rows="$boats" :cell-decoration="$cell_decoration">
-    @scope('cell_boat.external_id', $row)
+<div>
+    <x-mary-table :headers="$headers" :rows="$boats" :cell-decoration="$cell_decoration">
+        @scope('cell_boat.external_id', $row)
         @if($row->status == StatusEnum::COMPLETE || $row->status == StatusEnum::VALIDATED)
             <a href="{{ route('boats.show', $row->id) }}" wire:navigate class="block py-3 px-4">{{ $row->boat->external_id }}</a>
         @else
             {{ $row->boat->external_id }}
-       @endif
-    @endscope
-    @scope('cell_boat.model', $row)
+        @endif
+        @endscope
+        @scope('cell_boat.model', $row)
         @if($row->status == StatusEnum::COMPLETE || $row->status == StatusEnum::VALIDATED)
             <a href="{{ route('boats.show', $row->id) }}" wire:navigate class="block py-3 px-4">{{ $row->boat->model }}</a>
         @else
             {{ $row->boat->model }}
         @endif
-    @endscope
-    @scope('cell_status', $row)
-    <x-mary-badge :class="$row->status->cssClass()" :value="$row->status->toString()"></x-mary-badge>
-    @endscope
-</x-mary-table>
+        @endscope
+        @scope('cell_status', $row)
+        <x-mary-badge :class="$row->status->cssClass()" :value="$row->status->toString()"></x-mary-badge>
+        @endscope
+        @scope('actions', $boat)
+        <x-mary-button wire:click="delete({{$boat->id}})" icon="o-trash" class="btn-sm btn-ghost text-error" spinner />
+        @endscope
+    </x-mary-table>
+
+    <livewire:boats.delete wire:model="selectedRegistration"></livewire:boats.delete>
+</div>

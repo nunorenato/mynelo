@@ -3,14 +3,15 @@
 namespace App\Models;
 
 use App\Enums\StatusEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Prunable;
 
 class BoatRegistration extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Prunable;
 
     protected $fillable = [
         'boat_id',
@@ -56,6 +57,11 @@ class BoatRegistration extends Model
     }
     public function rudder():BelongsTo{
         return $this->belongsTo(Product::class, 'rudder_id');
+    }
+
+    public function prunable():Builder
+    {
+        return static::where('status', StatusEnum::CANCELED)->where('created_at', '<=', now()->subWeek());
     }
 
 }

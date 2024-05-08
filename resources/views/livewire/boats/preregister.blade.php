@@ -57,7 +57,7 @@ new class extends Component {
             ]);
 
             Mail::to(config('nelo.emails.admins'))
-                ->queue(new PreRegistrationMail($boatRegistration));
+                ->queue((new PreRegistrationMail($boatRegistration))->onQueue('mail'));
 
             activity()
                 ->on($boatRegistration)
