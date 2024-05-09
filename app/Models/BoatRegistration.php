@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Prunable;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class BoatRegistration extends Model
 {
-    use SoftDeletes, Prunable;
+    use SoftDeletes, Prunable, LogsActivity;
 
     protected $fillable = [
         'boat_id',
@@ -62,6 +64,13 @@ class BoatRegistration extends Model
     public function prunable():Builder
     {
         return static::where('status', StatusEnum::CANCELED)->where('created_at', '<=', now()->subWeek());
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status', 'voucher']);
+        // Chain fluent methods for configuration options
     }
 
 }

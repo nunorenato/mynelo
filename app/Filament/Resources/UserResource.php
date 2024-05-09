@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -72,6 +73,7 @@ class UserResource extends Resource
                     ->default(null),
                 Forms\Components\Toggle::make('alert_fill')
                     ->required(),
+                Forms\Components\Select::make('roles')->multiple()->relationship('roles', 'name'),
             ]);
     }
 
@@ -134,6 +136,7 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('activities')->url(fn ($record) => UserResource::getUrl('activities', ['record' => $record]))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -154,6 +157,7 @@ class UserResource extends Resource
         return [
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
+            'activities' => Pages\ListUserActivities::route('/{record}/activities'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
