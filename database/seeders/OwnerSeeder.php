@@ -36,7 +36,7 @@ class OwnerSeeder extends Seeder
                     'club' => $owner[7],
                     'competition' => $owner[8]==1,
                 ]);
-                Mail::to(config('nelo.emails.admins'))->send(new OldOwnerMail($user, $password));
+                Mail::to($user)->send(new OldOwnerMail($user, $password));
             }
             else{
                 dump($owner[1] . ' already exists');

@@ -56,8 +56,8 @@ new class extends Component
             'club' => ['nullable', 'max:255'],
             'discipline_id' => ['nullable'],
             'weekly_trainings' => ['nullable', 'numeric'],
-            'time_500' => ['nullable', 'regex:/\d+:\d\.?\d*/'],
-            'time_1000' => ['nullable', 'regex:/\d+:\d\.?\d*/'],
+            'time_500' => ['nullable', 'regex:/^\d+:\d\.?\d*$/'],
+            'time_1000' => ['nullable', 'regex:/^\d+:\d\.?\d*$/'],
             'goals' => ['nullable'],
         ]);
         //dd($validated);
@@ -124,8 +124,8 @@ new class extends Component
         <x-mary-select label="Favorite discipline" wire:model="discipline_id" :options="\App\Models\Discipline::all()" required ></x-mary-select>
         <div class="grid lg:grid-cols-3 gap-3" x-show="isCompetition == 1" x-transition>
             <x-mary-input type="number" label="Weekly training sessions" wire:model="weekly_trainings" class="space-y-4 text-right"></x-mary-input>
-            <x-mary-input type="text" label="Best time to 500m" wire:model="time_500" class="space-y-4 text-right" placeholder="mm:ss.ms"></x-mary-input>
-            <x-mary-input type="text" label="Best time to 1000m" wire:model="time_1000" class="space-y-4 text-right" placeholder="mm:ss.ms"></x-mary-input>
+            <x-mary-input type="text" label="Best time to 500m" wire:model="time_500" class="space-y-4 text-right" placeholder="mm:ss.ms" hint="Examples: 02:20 or 02:20.35"></x-mary-input>
+            <x-mary-input type="text" label="Best time to 1000m" wire:model="time_1000" class="space-y-4 text-right" placeholder="mm:ss.ms" hint="Examples: 05:20 or 05:20.35"></x-mary-input>
         </div>
         @php /*
         <x-mary-choices label="What is your main goal" wire:model="selectedGoals" :options="$allGoals" hint="Please select the 2 most important" />
