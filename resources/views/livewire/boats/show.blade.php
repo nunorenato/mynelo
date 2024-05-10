@@ -65,10 +65,10 @@ new class extends Component{
         $this->notComplete = $this->boatRegistration->status != \App\Enums\StatusEnum::COMPLETE;
 
         $this->seat_id = $this->boatRegistration->seat_id;
-        $this->seat_position = $this->boatRegistration->seat_position;
-        $this->seat_height = $this->boatRegistration->seat_height;
+        $this->seat_position = $this->boatRegistration->seat_position??10;
+        $this->seat_height = $this->boatRegistration->seat_height??0;
         $this->footrest_id = $this->boatRegistration->footrest_id;
-        $this->footrest_position = $this->boatRegistration->footrest_position;
+        $this->footrest_position = $this->boatRegistration->footrest_position??10;
         $this->rudder_id = $this->boatRegistration->rudder_id;
         $this->paddle = $this->boatRegistration->paddle;
         $this->paddle_length = $this->boatRegistration->paddle_length;
@@ -298,6 +298,7 @@ new class extends Component{
                                 @isset($boatRegistration->seat_position)
                                     <x-mary-list-item :item="$boatRegistration" value="seat_position">
                                         <x-slot:sub-value>Seat Position</x-slot:sub-value>
+                                        <x-slot:avatar><x-mary-avatar image="/images/SeatPosition.svg" class="!w-11"></x-mary-avatar></x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 
@@ -307,6 +308,7 @@ new class extends Component{
                                 @isset($boatRegistration->seat_height)
                                     <x-mary-list-item :item="$boatRegistration" value="seat_height">
                                         <x-slot:sub-value>Seat Height</x-slot:sub-value>
+                                        <x-slot:avatar><x-mary-avatar image="/images/SeatHeight.svg" class="!w-11"></x-mary-avatar></x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 
@@ -326,6 +328,7 @@ new class extends Component{
                                 @isset($boatRegistration->footrest_position)
                                     <x-mary-list-item :item="$boatRegistration" value="footrest_position">
                                         <x-slot:sub-value>Footrest Position</x-slot:sub-value>
+                                        <x-slot:avatar><x-mary-avatar image="/images/FootRestPosition.svg" class="!w-11"></x-mary-avatar></x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 
@@ -347,6 +350,9 @@ new class extends Component{
                                 @isset($boatRegistration->paddle)
                                     <x-mary-list-item :item="$boatRegistration" value="paddle">
                                         <x-slot:sub-value>Paddle</x-slot:sub-value>
+                                        <x-slot:avatar>
+                                            <x-mary-icon name="mdi.oar" class="!w-11"></x-mary-icon>
+                                        </x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 
@@ -357,6 +363,9 @@ new class extends Component{
                                 @isset($boatRegistration->paddle_length)
                                     <x-mary-list-item :item="$boatRegistration" value="paddle_length">
                                         <x-slot:sub-value>Paddle Length</x-slot:sub-value>
+                                        <x-slot:avatar>
+                                            <x-mary-icon name="carbon.ruler-alt" class="!w-11"></x-mary-icon>
+                                        </x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 
