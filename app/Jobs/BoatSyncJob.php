@@ -170,7 +170,7 @@ class BoatSyncJob implements ShouldQueue
         $this->boat->save();
     }
 
-    public function middleware():array{
+    /*public function middleware():array{
         return [new WithoutOverlapping()];
-    }
+    }*/
 }

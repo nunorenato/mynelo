@@ -28,9 +28,38 @@ class TestingController extends Controller
     public function index()
     {
 
-        BoatSyncJob::dispatch(Boat::find(16), 136484);
+        $boats = [136392,
+            135334,
+            135381,
+            135386,
+            135256,
+            136430,
+            134956,
+            135498,
+            135169,
+            135209,
+            135336,
+            135317,
+            135732,
+            135389,
+            136517,
+            135257,
+            135392,
+            135380,
+            135439,
+            135390,
+            135211,
+            135043,
+            136225,
+            135339,
+            135335,
+            128276,
+        ];
 
-
+        foreach ($boats as $external_id) {
+            $boat = Boat::where('external_id', $external_id)->first();
+            BoatSyncJob::dispatch($boat, $external_id);
+        }
 
         dump('ok');
 
