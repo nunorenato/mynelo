@@ -17,7 +17,6 @@
     @stack('head')
 </head>
 <body class="min-h-screen font-sans antialiased bg-base-200/50 dark:bg-base-200">
-
 {{-- NAVBAR mobile only --}}
 <x-mary-nav sticky class="lg:hidden">
     <x-slot:brand>
@@ -36,7 +35,7 @@
     <x-slot:sidebar drawer="main-drawer" collapsible class="bg-base-100 lg:bg-inherit">
 
         {{-- BRAND --}}
-        <div class="ml-5 pt-5"><x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" /></div>
+        <div class="ml-5 pt-5"><a href="/"><x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" /></a></div>
 
         {{-- MENU --}}
         <livewire:layout.sidenavigation />

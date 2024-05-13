@@ -28,6 +28,8 @@ class TestingController extends Controller
     public function index()
     {
 
+        dump(config('nelo.emails.admins'));
+
         dump('ok');
 
     }
