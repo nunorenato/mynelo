@@ -14,6 +14,7 @@ use App\Models\BoatRegistration;
 use App\Models\Product;
 use App\Models\ProductType;
 use App\Models\Worker;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +29,12 @@ class TestingController extends Controller
     public function index()
     {
 
-        dump(config('nelo.emails.admins'));
+        dump(BoatRegistration::orWhere(function (Builder $query) {
+            $query->where('status', StatusEnum::CANCELED)
+                ->where('created_at', '<=', now()->subWeek());
+        })
+            ->orWhere('status', StatusEnum::PENDING)
+            ->toSql());
 
         dump('ok');
 

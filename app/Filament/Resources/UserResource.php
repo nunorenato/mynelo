@@ -21,6 +21,8 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?int $navigationSort = 20;
+
 
     public static function form(Form $form): Form
     {
@@ -93,22 +95,23 @@ class UserResource extends Resource
                 ->circular(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
+                /*Tables\Columns\TextColumn::make('email')
+                    ->searchable(),*/
                 Tables\Columns\TextColumn::make('country.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Registration')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
+                    //->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('date_of_birth')
+                /*Tables\Columns\TextColumn::make('date_of_birth')
                     ->date()
-                    ->sortable(),
+                    ->sortable(),*/
                /* Tables\Columns\TextColumn::make('height')
                     ->numeric()
                     ->sortable(),
@@ -133,12 +136,16 @@ class UserResource extends Resource
                 Tables\Columns\IconColumn::make('alert_fill')
                     ->boolean(),*/
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Action::make('activities')->url(fn ($record) => UserResource::getUrl('activities', ['record' => $record]))
+                Action::make('activities')
+                    ->url(fn ($record) => UserResource::getUrl('activities', ['record' => $record]))
+                    ->icon('heroicon-o-clock')
+                    ->color('info'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -150,7 +157,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\BoatsRelationManager::class,
         ];
     }
 
