@@ -9,11 +9,14 @@ use App\Models\Discipline;
 use App\Models\Attribute;
 use App\Models\Content;
 use Livewire\Volt\Component;
+use Illuminate\Database\Eloquent\Collection;
 use Mary\Traits\Toast;
+use Livewire\WithFileUploads;
+use Mary\Traits\WithMediaSync;
 
 
 new class extends Component{
-    use Toast;
+    use Toast, WithFileUploads, WithMediaSync;
 
     public BoatRegistration $boatRegistration;
 
@@ -21,6 +24,7 @@ new class extends Component{
     public bool $deleteModal = false;
     public bool $showUpgrades = false;
     public bool $showContent = false;
+    public bool $showRepair = false;
 
     public Boat $boat;
     public Product $model;
@@ -42,6 +46,11 @@ new class extends Component{
     public ?Content $selectedContent;
 
     public bool $notComplete = true;
+
+    public string $repairDescription;
+    #[Rule(['$repairImages.*' => 'image'])]
+    public array $repairImages;
+    public \Illuminate\Support\Collection $repairLibrary;
 
     public array $rules = [
         'seat_id' => ['numeric', 'nullable'],
@@ -77,7 +86,10 @@ new class extends Component{
         if(!empty($this->discipline)){
             foreach ($this->discipline->fields as $field){
                 if($field->required){
-                    $this->rules[$field->columnn][] = 'required';
+                    $this->rules[$field->column] = array_filter($this->rules[$field->column], function($element){
+                        return $element != 'nullable';
+                    });
+                    $this->rules[$field->column][] = 'required';
                 }
             }
         }
@@ -85,11 +97,12 @@ new class extends Component{
         $pos = strripos($this->boat->model, ' ');
         $layupKey = trim(strtolower(substr($this->boat->model, $pos+1)));
         $this->layup = Content::where('path', "layups/$layupKey")->first();
+
+        $this->repairLibrary = new \Illuminate\Support\Collection();
     }
 
     public function saveSetup():void
     {
-
 
         $validated = $this->validate();
         //dump($validated);
@@ -110,6 +123,31 @@ new class extends Component{
 
     public function saveVoucher():void{
         $this->boatRegistration->voucher = $this->voucher;
+    }
+
+    public function sendRepair()
+    {
+        $validated = $this->validate([
+            'repairDescription' => ['required'],
+            'repairImages.*' => ['image'],
+        ]);
+
+        $attachs = [];
+        foreach($validated['repairImages'] as $image){
+            $attachs[] = $image->getPathname();
+        }
+        //dump($attachs);
+
+        Mail::to(config('nelo.emails.admins'))
+            ->send(new \App\Mail\RepairMail(Auth::user(), $this->boat, $validated['repairDescription'], $attachs));
+
+        activity()
+            ->on($this->boat)
+            ->by(Auth::user())
+            ->event('request')
+            ->log('Sent repair request');
+
+        $this->showRepair = false;
     }
 
     public function removeBoat():void
@@ -225,8 +263,8 @@ new class extends Component{
     <div class="mb-5 gap-5 {{ $notComplete?'blur-sm':'' }}">
         <x-mary-button label="Boat care" icon="o-wrench-screwdriver" class="btn-lg btn-secondary" wire:click="loadContent({{ Content::findByPath('boatcare')->id }})" spinner></x-mary-button>
         <x-mary-button label="Move this boat" icon="o-truck" link="https://moveyourboat.paddle-lab.com" class="btn-lg btn-secondary" external></x-mary-button>
-        <x-mary-button label="Repair" icon="o-wrench-screwdriver" class="btn-lg btn-secondary"></x-mary-button>
-        <x-mary-button label="Sell" icon="o-currency-euro" class="btn-lg btn-secondary" wire:click="loadContent({{ Content::findByPath('sell')->id }})" spinner></x-mary-button>
+        <x-mary-button label="Repair" icon="o-wrench-screwdriver" class="btn-lg btn-secondary" @click="$wire.showRepair = true" spinner></x-mary-button>
+        <x-mary-button label="Sell" icon="o-currency-euro" class="btn-lg btn-neutral" wire:click="loadContent({{ Content::findByPath('sell')->id }})" spinner></x-mary-button>
     </div>
 
     <div class="grid lg:grid-cols-3 gap-5">
@@ -503,4 +541,23 @@ new class extends Component{
             <x-mary-button label="Close" @click="$wire.showContent = false"></x-mary-button>
         </x-slot:actions>
     </x-mary-drawer>
+
+    <x-mary-modal title="Repair service" subtitle="Fill the form bellow so our team can analyze it and send you a quote." wire:model="showRepair">
+        @push('head')
+            {{-- Cropper.js --}}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+
+            {{-- Sortable.js --}}
+            <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.1/Sortable.min.js"></script>
+        @endpush
+        <x-mary-form wire:submit="sendRepair">
+            <x-mary-textarea label="Describe the issues with your boat" rows="5" wire:model="repairDescription" required></x-mary-textarea>
+            <x-mary-image-library label="Photos of the issues" wire:model="repairImages" wire:library="repairLibrary" :preview="$repairLibrary" required></x-mary-image-library>
+            <x-slot:actions>
+                <x-mary-button label="Send" icon="o-paper-airplane" class="btn-primary" type="submit"></x-mary-button>
+                <x-mary-button label="Close" @click="$wire.showRepair = false"></x-mary-button>
+            </x-slot:actions>
+        </x-mary-form>
+    </x-mary-modal>
 </div>

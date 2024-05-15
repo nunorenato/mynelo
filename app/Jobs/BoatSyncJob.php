@@ -114,7 +114,7 @@ class BoatSyncJob implements ShouldQueue
             Log::info('Adding colors to boat');
 
             // apagamos sempre as cores
-            $this->boat->products()->where('product_type_id', '=', ProductTypeEnum::Color->value)->detach();
+            $this->boat->products()->detach($this->boat->products()->where('product_type_id', '=', ProductTypeEnum::Color->value)->get()->pluck('id'));
 
             foreach ($response->json() as $jsonColor){
                 $pColor = Product::firstOrCreate([
@@ -122,9 +122,10 @@ class BoatSyncJob implements ShouldQueue
                 ],[
                     'name' => $jsonColor['color']['name'],
                     'external_id' => $jsonColor['color']['id'],
-                    'attributes' => ['hex' => $jsonColor['color']['id']],
+                    'attributes' => ['hex' => $jsonColor['color']['hex']],
                     'product_type_id' => ProductTypeEnum::Color
                 ]);
+                Log::debug('Color', $pColor->toArray());
                 $this->boat->products()->attach($pColor->id, ['attribute_id' => Attribute::firstWhere('external_id', $jsonColor['id'])->id]);
             }
         }
@@ -137,7 +138,7 @@ class BoatSyncJob implements ShouldQueue
             Log::info('Adding fittings to boat');
 
             // apagamos todos os fittings
-            $this->boat->products()->where('product_type_id', '<>', ProductTypeEnum::Color->value)->detach();
+            $this->boat->products()->detach($this->boat->products()->where('product_type_id', '<>', ProductTypeEnum::Color->value)->get()->pluck('id'));
             foreach ($response->json() as $jsonProduct){
 
                 $pFitting = Product::getWithSync($jsonProduct['product']['id']);

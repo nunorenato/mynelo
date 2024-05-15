@@ -29,8 +29,8 @@ export default {
             {
                 nelotheme: {
                     "primary": "lightgray",
-                    "secondary": "#999999",
-                    "accent": "#37cdbe",
+                    "secondary": "#E0CD3F",
+                    "accent": "#E05E4C",
                     "neutral": "#3d4451",
                     "base-100": "#ffffff",
                 }

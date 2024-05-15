@@ -8,6 +8,8 @@ use App\Models\Boat;
 use App\Models\Product;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class Kernel extends ConsoleKernel
 {
@@ -37,6 +39,18 @@ class Kernel extends ConsoleKernel
             ->dailyAt('02:00');
 
         $schedule->command('model:prune')->daily();
+
+        $schedule->call(function(){
+            foreach(Storage::files('livewire-tmp') as $file){
+                //dump($file);
+                $time = Storage::lastModified($file);
+                $fileModifiedDateTime = Carbon::parse($time);
+                if(now()->subDay()->gt($fileModifiedDateTime)){
+                    dump("delete $file");
+                    Storage::delete($file);
+                }
+            }
+        })->dailyAt('03:00');
     }
 
     /**

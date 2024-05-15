@@ -15,10 +15,12 @@ use App\Models\Product;
 use App\Models\ProductType;
 use App\Models\Worker;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PhpParser\JsonDecoder;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileCannotBeAdded;
@@ -29,12 +31,19 @@ class TestingController extends Controller
     public function index()
     {
 
-        dump(BoatRegistration::orWhere(function (Builder $query) {
-            $query->where('status', StatusEnum::CANCELED)
-                ->where('created_at', '<=', now()->subWeek());
-        })
-            ->orWhere('status', StatusEnum::PENDING)
-            ->toSql());
+        foreach(Product::where('product_type_id', ProductTypeEnum::Color)->where('attributes->hex', 'NOT LIKE', '%#%')->get() as $product){
+            //dump($product);
+            $product->updateFromAPI();
+        }
+
+
+        foreach (Boat::all() as $boat){
+            BoatSyncJob::dispatch($boat, $boat->external_id);
+        }
+
+
+
+
 
         dump('ok');
 

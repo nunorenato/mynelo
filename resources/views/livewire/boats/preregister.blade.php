@@ -11,7 +11,7 @@ use Livewire\Volt\Component;
 use App\Traits\HasCssClassAttribute;
 
 new class extends Component {
-    use HasCssCLassAttribute;
+    use HasCssClassAttribute;
 
     public string $label = 'Register';
 
