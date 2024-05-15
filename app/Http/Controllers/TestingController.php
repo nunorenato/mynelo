@@ -30,21 +30,6 @@ class TestingController extends Controller
 {
     public function index()
     {
-
-        foreach(Product::where('product_type_id', ProductTypeEnum::Color)->where('attributes->hex', 'NOT LIKE', '%#%')->get() as $product){
-            //dump($product);
-            $product->updateFromAPI();
-        }
-
-
-        foreach (Boat::all() as $boat){
-            BoatSyncJob::dispatch($boat, $boat->external_id);
-        }
-
-
-
-
-
         dump('ok');
 
     }

@@ -83,8 +83,10 @@ class BoatRegistrationResource extends Resource
 
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('boat.external_id')
-                    ->numeric()
+                    ->label('Boat ID')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('boat.model')
