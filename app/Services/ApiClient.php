@@ -23,19 +23,19 @@ abstract class ApiClient
         }
 
     }
-    protected function get(string $endpoint):Response{
+    protected function get(string $endpoint, array $params = []):Response{
 
         $fullURL = $this->baseURL.$endpoint;
 
         if($this->authType == AuthTypeEnum::None){
-            return Http::get($fullURL);
+            return Http::get($fullURL, $params);
         }
 
         if($this->authType == AuthTypeEnum::BearerToken){
-            return Http::withToken($this->bearerToken)->get($fullURL);
+            return Http::withToken($this->bearerToken)->get($fullURL, $params);
         }
 
-        return Http::get($fullURL);
+        return Http::get($fullURL, $params);
     }
     protected function post($endpoint, $payload):Response{
 

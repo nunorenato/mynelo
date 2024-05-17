@@ -6,6 +6,8 @@ use App\Http\Controllers\DealerController;
 use App\Jobs\BoatSyncJob;
 use App\Models\Boat;
 use App\Models\Product;
+use App\Models\User;
+use App\Services\MagentoApiClient;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Carbon;
@@ -50,7 +52,22 @@ class Kernel extends ConsoleKernel
                     Storage::delete($file);
                 }
             }
-        })->dailyAt('03:00');
+        })->dailyAt('03:00')->name('Delete temp uploads');
+
+        $schedule->call(function (){
+            $users = User::whereJsonContains('extras->coupon_used', false)->get();
+            dump(count($users));
+            $magento = new MagentoApiClient();
+            foreach ($users as $user){
+                $coupon = $magento->searchCouponByCode($user->extras['coupon']);
+                if(!empty($coupon) && $coupon->times_used > 0){
+                    //$user->extras['coupon_used'] = true;
+                    $user->update(['extras->coupon_used' => true]);
+                    //$user->save();
+                }
+                //dd($coupon);
+            }
+        })->dailyAt('02:00')->name('Update used coupon');
     }
 
     /**

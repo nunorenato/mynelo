@@ -52,9 +52,7 @@ new #[Layout('layouts.guest')] class extends Component
                 </a>
             @endif
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+            <x-mary-button class="ms-3" type="submit">Log in</x-mary-button>
         </div>
     </form>
 </div>

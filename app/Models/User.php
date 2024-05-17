@@ -45,6 +45,8 @@ class User extends Authenticatable implements FilamentUser
         'time_1000',
         'alert_fill',
         'extras',
+        'extras->coupon',
+        'extras->coupon_used',
     ];
 
     /**
@@ -69,6 +71,7 @@ class User extends Authenticatable implements FilamentUser
         'competition' => 'boolean',
         'alert_fill' => 'boolean',
         'extras' => 'json',
+        'extras->coupon_used' => 'boolean',
     ];
 
     public function country():BelongsTo{

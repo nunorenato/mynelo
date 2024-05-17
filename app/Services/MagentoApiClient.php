@@ -32,4 +32,21 @@ class MagentoApiClient extends ApiClient
         return null;
     }
 
+    public function searchCouponByCode(string $code):object|null
+    {
+        $response = $this->get('/coupons/search', [
+            'searchCriteria[filterGroups][0][filters][0][field]' => 'code',
+            'searchCriteria[filterGroups][0][filters][0][value]' => $code
+        ]);
+        if($response->ok()){
+            $obj = $response->object();
+            if(count($obj->items) > 0)
+                return $obj->items[0];
+            else
+                return null;
+        }
+        else
+            return null;
+    }
+
 }

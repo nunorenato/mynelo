@@ -531,6 +531,8 @@ new class extends Component{
                 </x-mary-list-item>
             @endforeach
         @endisset
+        <x-mary-menu-separator></x-mary-menu-separator>
+            <x-mary-button icon="o-beaker" link="https://paddle-lab.com/paddles-accessories/https-paddle-lab-com-paddles-accessories-nelo-training-gadgets-html.html" external>Discover our training gadgets</x-mary-button>
             <x-slot:actions>
                 <x-mary-button label="Close" @click="$wire.showUpgrades = false"></x-mary-button>
             </x-slot:actions>
