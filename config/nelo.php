@@ -12,5 +12,13 @@ return [
 
     'shop' => [
         'base_product_url' => 'https://paddle-lab.com/catalogsearch/result/?q=',
-    ]
+    ],
+
+    'magento' => [
+        'api' => [
+            'url' => env('MAGENTO_API_URL', 'https://paddlesportsdesign.com/rest/V1'),
+            'token' => env('MAGENTO_API_TOKEN'),
+        ],
+        'coupon_rule' => env('MAGENTO_COUPON_RULE'),
+    ],
 ];

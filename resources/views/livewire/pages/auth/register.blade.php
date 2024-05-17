@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\MagentoCouponJob;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
@@ -9,8 +10,7 @@ use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-new #[Layout('layouts.guest')] class extends Component
-{
+new #[Layout('layouts.guest')] class extends Component {
     public string $name = '';
     public string $email = '';
     public string $country_id = '';
@@ -24,7 +24,7 @@ new #[Layout('layouts.guest')] class extends Component
     {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
             'country_id' => ['required'],
         ]);
@@ -35,6 +35,8 @@ new #[Layout('layouts.guest')] class extends Component
 
         Auth::login($user);
 
+        MagentoCouponJob::dispatch($user);
+
         $this->redirect(RouteServiceProvider::HOME, navigate: true);
     }
 }; ?>
@@ -42,11 +44,13 @@ new #[Layout('layouts.guest')] class extends Component
 <div>
     <form wire:submit="register">
         <!-- Name -->
-        <x-mary-input label="Name" wire:model="name" required autofocus autocomplete="name" icon="o-user" placeholder="Your name" />
+        <x-mary-input label="Name" wire:model="name" required autofocus autocomplete="name" icon="o-user"
+                      placeholder="Your name"/>
 
         <!-- Email Address -->
         <div class="mt-4">
-            <x-mary-input label="Email" wire:model="email" required autocomplete="username" icon="o-at-symbol" type="email" placeholder="Your email" />
+            <x-mary-input label="Email" wire:model="email" required autocomplete="username" icon="o-at-symbol"
+                          type="email" placeholder="Your email"/>
         </div>
 
         <!-- Country -->
@@ -54,12 +58,12 @@ new #[Layout('layouts.guest')] class extends Component
             @php
                 $countries = App\Models\Country::all(['id', 'name']);
             @endphp
-            <x-mary-select label="Country" :options="$countries" wire:model="country_id" />
+            <x-mary-select label="Country" :options="$countries" wire:model="country_id"/>
         </div>
 
         <!-- Password -->
         <div class="mt-4">
-            <x-mary-input label="Password" wire:model="password" icon="o-eye" type="password" required />
+            <x-mary-input label="Password" wire:model="password" icon="o-eye" type="password" required/>
         </div>
 
         <!-- Confirm Password -->
@@ -68,7 +72,8 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
 
         <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}" wire:navigate>
+            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+               href="{{ route('login') }}" wire:navigate>
                 {{ __('Already registered?') }}
             </a>
 

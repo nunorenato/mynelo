@@ -147,6 +147,8 @@ new class extends Component{
             ->event('request')
             ->log('Sent repair request');
 
+        $this->success('Message sent successfully');
+
         $this->showRepair = false;
     }
 
@@ -261,10 +263,10 @@ new class extends Component{
     @endif
 
     <div class="mb-5 gap-5 {{ $notComplete?'blur-sm':'' }}">
-        <x-mary-button label="Boat care" icon="o-wrench-screwdriver" class="btn-lg btn-secondary" wire:click="loadContent({{ Content::findByPath('boatcare')->id }})" spinner></x-mary-button>
-        <x-mary-button label="Move this boat" icon="o-truck" link="https://moveyourboat.paddle-lab.com" class="btn-lg btn-secondary" external></x-mary-button>
-        <x-mary-button label="Repair" icon="o-wrench-screwdriver" class="btn-lg btn-secondary" @click="$wire.showRepair = true" spinner></x-mary-button>
-        <x-mary-button label="Sell" icon="o-currency-euro" class="btn-lg btn-neutral" wire:click="loadContent({{ Content::findByPath('sell')->id }})" spinner></x-mary-button>
+        <x-mary-button label="Boat care" icon="tabler.shield-heart" class="lg:btn-lg btn-secondary w-full mb-2 lg:w-auto lg:mb-0" wire:click="loadContent({{ Content::findByPath('boatcare')->id }})" spinner></x-mary-button>
+        <x-mary-button label="Move this boat" icon="o-truck" link="https://moveyourboat.paddle-lab.com" class="lg:btn-lg btn-secondary w-full mb-2 lg:w-auto lg:mb-0" external></x-mary-button>
+        <x-mary-button label="Repair" icon="o-wrench-screwdriver" class="lg:btn-lg btn-secondary w-full mb-2 lg:w-auto lg:mb-0" @click="$wire.showRepair = true" spinner></x-mary-button>
+        <x-mary-button label="Sell" icon="o-currency-euro" class="lg:btn-lg btn-neutral w-full mb-0 lg:w-auto" wire:click="loadContent({{ Content::findByPath('sell')->id }})" spinner></x-mary-button>
     </div>
 
     <div class="grid lg:grid-cols-3 gap-5">
@@ -336,7 +338,8 @@ new class extends Component{
                                 @isset($boatRegistration->seat_position)
                                     <x-mary-list-item :item="$boatRegistration" value="seat_position">
                                         <x-slot:sub-value>Seat Position</x-slot:sub-value>
-                                        <x-slot:avatar><x-mary-avatar image="/images/SeatPosition.svg" class="!w-11"></x-mary-avatar></x-slot:avatar>
+                                        @php /* <x-slot:avatar><x-mary-avatar image="/images/SeatPosition.svg" class="!w-11"></x-mary-avatar></x-slot:avatar> */ @endphp
+                                        <x-slot:avatar><x-mary-icon name="tabler.arrow-autofit-width" class="!w-11"></x-mary-icon></x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 
@@ -346,7 +349,8 @@ new class extends Component{
                                 @isset($boatRegistration->seat_height)
                                     <x-mary-list-item :item="$boatRegistration" value="seat_height">
                                         <x-slot:sub-value>Seat Height</x-slot:sub-value>
-                                        <x-slot:avatar><x-mary-avatar image="/images/SeatHeight.svg" class="!w-11"></x-mary-avatar></x-slot:avatar>
+                                        @php /* <x-slot:avatar><x-mary-avatar image="/images/SeatHeight.svg" class="!w-11"></x-mary-avatar></x-slot:avatar>*/ @endphp
+                                        <x-slot:avatar><x-mary-icon name="tabler.arrow-autofit-height" class="!w-11"></x-mary-icon></x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 
@@ -366,7 +370,8 @@ new class extends Component{
                                 @isset($boatRegistration->footrest_position)
                                     <x-mary-list-item :item="$boatRegistration" value="footrest_position">
                                         <x-slot:sub-value>Footrest Position</x-slot:sub-value>
-                                        <x-slot:avatar><x-mary-avatar image="/images/FootRestPosition.svg" class="!w-11"></x-mary-avatar></x-slot:avatar>
+                                        @php /*<x-slot:avatar><x-mary-avatar image="/images/FootRestPosition.svg" class="!w-11"></x-mary-avatar></x-slot:avatar>*/ @endphp
+                                        <x-slot:avatar><x-mary-icon name="tabler.arrow-bar-both" class="!w-11"></x-mary-icon></x-slot:avatar>
                                     </x-mary-list-item>
                                 @endisset
 

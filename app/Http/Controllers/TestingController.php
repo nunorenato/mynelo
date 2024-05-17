@@ -6,6 +6,7 @@ use App\Enums\FieldEnum;
 use App\Enums\ProductTypeEnum;
 use App\Enums\StatusEnum;
 use App\Jobs\BoatSyncJob;
+use App\Jobs\MagentoCouponJob;
 use App\Mail\PreRegistrationMail;
 use App\Mail\RegistrationResultMail;
 use App\Models\Attribute;
@@ -13,7 +14,9 @@ use App\Models\Boat;
 use App\Models\BoatRegistration;
 use App\Models\Product;
 use App\Models\ProductType;
+use App\Models\User;
 use App\Models\Worker;
+use App\Services\MagentoApiClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +33,10 @@ class TestingController extends Controller
 {
     public function index()
     {
+
+        MagentoCouponJob::dispatch(User::find(1));
+
+
         dump('ok');
 
     }

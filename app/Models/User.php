@@ -44,6 +44,7 @@ class User extends Authenticatable implements FilamentUser
         'time_500',
         'time_1000',
         'alert_fill',
+        'extras',
     ];
 
     /**
@@ -67,6 +68,7 @@ class User extends Authenticatable implements FilamentUser
         'gender' => GenderEnum::class,
         'competition' => 'boolean',
         'alert_fill' => 'boolean',
+        'extras' => 'json',
     ];
 
     public function country():BelongsTo{
