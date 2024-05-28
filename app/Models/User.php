@@ -104,4 +104,9 @@ class User extends Authenticatable implements FilamentUser
     public function isAdmin():bool{
         return $this->hasRole(Role::findByName('Admin'));
     }
+
+    public function paddleLabCustomer():\App\Models\Magento\CustomerEntity|null
+    {
+        return \App\Models\Magento\CustomerEntity::firstWhere('email', 'josse@guerra.fslife.co.uk');// $this->email);
+    }
 }

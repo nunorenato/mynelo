@@ -99,4 +99,36 @@ class Boat extends Model implements HasMedia
             ->where('id', '<>', $newRegistrationId)
             ->delete();
     }
+
+    /**
+     * Market price from the current price list, depreciated by year
+     *
+     * @param $price
+     * @return int|null
+     */
+    public function marketValue():int|null
+    {
+        if(empty($this->finished_at) || empty($this->product->retail_price))
+            return null;
+
+        $age = now()->diffInYears($this->finished_at)+1;
+        //$price = 2500;
+
+        /**
+         * newPrice = price - price * 1yearDepreciation - price * 2yearDepreciation - ....
+         * or
+         * newPrice = price * (1 - 1year - 2year ---)
+         */
+        $depreciation = 1;
+        for($i = 1; $i <= $age; $i++){
+            $depreciation -= match($i){
+                1 => 0.25,
+                2 => 0.15,
+                3 => 0.1,
+                4 => 0.05,
+                default => 0.01,
+            };
+        }
+        return intval($this->product->retail_price * $depreciation);
+    }
 }

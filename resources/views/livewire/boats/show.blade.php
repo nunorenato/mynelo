@@ -208,7 +208,9 @@ new class extends Component{
             $details[] = ['name' => $this->boat->finished_weight, 'sub-value' => 'Final weight (kg)', 'icon' => 'o-scale', 'class' => $this->notComplete?'blur-sm':null];
         if(is_numeric($this->boat->co2))
             $details[] = ['name' => $this->boat->co2, 'sub-value' => 'Carbon footprint (kg co2 eq.)', 'icon' => 'carbon.carbon-accounting', 'class' => $this->notComplete?'blur-sm':null];
-        $details[] = ['name' => '€€€€.€€', 'sub-value' => 'Market value', 'icon' => 'o-banknotes', 'class' => $this->notComplete?'blur-sm':null];
+        $marketValue = $this->boat->marketValue();
+        if(is_numeric($marketValue))
+            $details[] = ['name' => '€'.$marketValue, 'sub-value' => 'Market value', 'icon' => 'o-banknotes', 'class' => $this->notComplete?'blur-sm':null];
 
         return [
             'details' => $details,
@@ -219,8 +221,8 @@ new class extends Component{
             'boatMedia' => $boatMedia,
             'voucherQueryString' => Arr::query([
                 'mynelo' => 1,
-                'wpf18625_1' => $this->boatRegistration->voucher,
-                'wpf18625_2' => $this->boat->external_id,
+                'voucher' => $this->boatRegistration->voucher,
+                'boat-id' => $this->boat->external_id,
                 'email' => $this->boatRegistration->user->email,
                 'owner' => $this->boatRegistration->user->name,
             ]),
@@ -525,9 +527,11 @@ new class extends Component{
                 <x-mary-list-item :item="$option">
                     <x-slot:subValue>{!! $option->description !!}</x-slot:subValue>
                     <x-slot:avatar><x-mary-avatar :image="$option->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
+                    @isset($option->attributes['magento_url'])
                     <x-slot:actions>
-                        <x-mary-button label="Buy" :link="config('nelo.shop.base_product_url').$option->external_id" external></x-mary-button>
+                        <x-mary-button label="Buy" :link="config('nelo.shop.base_product_url').$option->attributes['magento_url'].'.html'" external></x-mary-button>
                     </x-slot:actions>
+                    @endisset
                 </x-mary-list-item>
             @endforeach
         @endisset
@@ -540,7 +544,7 @@ new class extends Component{
 
     <livewire:boats.delete :boat_registration="$boatRegistration"></livewire:boats.delete>
 
-    <x-mary-drawer wire:model="showContent" title="About this model" right class="w-11/12 lg:w-1/2">
+    <x-mary-drawer wire:model="showContent" :title="$selectedContent->title??''" right class="w-11/12 lg:w-1/2">
         @isset($selectedContent)
             <x-basic-content :content="$selectedContent" no-title></x-basic-content>
         @endisset

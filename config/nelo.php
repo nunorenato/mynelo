@@ -11,7 +11,7 @@ return [
     ],
 
     'shop' => [
-        'base_product_url' => 'https://paddle-lab.com/catalogsearch/result/?q=',
+        'base_product_url' => 'https://paddle-lab.com/',
     ],
 
     'magento' => [

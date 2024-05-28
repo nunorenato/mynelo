@@ -49,4 +49,17 @@ class MagentoApiClient extends ApiClient
             return null;
     }
 
+    public function getProduct(string $sku):object|null{
+        $response = $this->get('/products/' . $sku, [
+            'editMode' => false,
+            'storeId' => 6,
+            'forceReload' => false,
+        ]);
+        if($response->ok()){
+            return $response->object();
+        }
+        else
+            return null;
+    }
+
 }

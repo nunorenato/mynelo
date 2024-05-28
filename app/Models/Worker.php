@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Enums\PersonTypeEnum;
-use App\Http\Controllers\ImageController;
 use App\Models\Person;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileCannotBeAdded;
@@ -18,7 +18,7 @@ class Worker extends Person implements HasMedia
     protected $attributes = [
         'person_type_id' => PersonTypeEnum::Worker,
     ];
-    public function newQuery(){
+    public function newQuery(): Builder{
         return parent::newQuery()->where('person_type_id', '=', PersonTypeEnum::Worker);
     }
 

@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
 
-class BoatModel extends Product
+class BoatModel extends \App\Models\Product
 {
-    public function newQuery(){
-        return parent::newQuery()->where('E_ENT_ID', '=', \App\Enums\ProductTypeEnum::Boat);
+    protected $table = 'products';
+
+    public function newQuery(): Builder{
+        return parent::newQuery()->where('product_type_id', '=', \App\Enums\ProductTypeEnum::Boat);
     }
 }

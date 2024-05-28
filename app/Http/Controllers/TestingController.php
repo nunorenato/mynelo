@@ -34,7 +34,10 @@ class TestingController extends Controller
     public function index()
     {
 
-        MagentoCouponJob::dispatch(User::find(1));
+       // MagentoCouponJob::dispatch(User::find(1));
+
+        $boat = Boat::find(12);
+        dump($boat->marketValue());
 
 
         dump('ok');

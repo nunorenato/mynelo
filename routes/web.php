@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('boats/{boatRegistration}', 'boats.show')->name('boats.show');
 
     Volt::route('paddle-lab', 'paddlelab.index')->name('paddle-lab');
+    Volt::route('paddle-lab/order/{order}', 'paddlelab.show')->name('paddle-lab.order');
 
     Route::view('coach', 'livewire.coach.index')->name('coach');
 

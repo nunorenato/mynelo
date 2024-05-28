@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DisciplineEnum;
 use App\Enums\ProductTypeEnum;
 use App\Http\Controllers\ImageController;
+use App\Services\MagentoApiClient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -26,12 +27,14 @@ class Product extends Model implements HasMedia
         'discipline_id',
         'attributes',
         'attributes->hex',
+        'attributes->magento_url',
         'description',
+        'retail_price',
     ];
 
     protected $casts = [
         'attributes' => 'json',
-        'external_id' => 'int'
+        'external_id' => 'int',
     ];
 
 
@@ -72,7 +75,7 @@ class Product extends Model implements HasMedia
         });
     }
 
-    public static function createFromJSON(object $product){
+    public static function createFromJSON(object $product):Product|null{
 
         ///dd($product);
 
@@ -113,6 +116,9 @@ class Product extends Model implements HasMedia
             $p->getOptionsFromAPI();
         }
 
+        if($type != ProductTypeEnum::Boat && $type != ProductTypeEnum::Color)
+            $p->updateFromMagento();
+
         return $p;
     }
 
@@ -126,9 +132,10 @@ class Product extends Model implements HasMedia
 
             $this->name = $extProduct->name;
             $this->description = empty($extProduct->description)?null:$extProduct->description;
+            $this->retail_price = $extProduct->retail_price;
             if(!empty($extProduct->color)) {
                 $this->fill([
-                    'attributes' => ['hex' => $extProduct->color]
+                    'attributes->hex' => $extProduct->color
                 ]);
             }
 
@@ -169,6 +176,25 @@ class Product extends Model implements HasMedia
 
             }
         }
+    }
 
+    public function updateFromMagento():void{
+        $magento = new MagentoApiClient();
+
+        $product = $magento->getProduct($this->external_id);
+
+        if(empty($product)){
+            return;
+        }
+
+        foreach ($product->custom_attributes as $attribute){
+            if($attribute->attribute_code == 'url_key'){
+                $this->fill(['attributes->magento_url' => $attribute->value]);
+                $this->save();
+                break;
+            }
+        }
+
+        //dump($product);
     }
 }
