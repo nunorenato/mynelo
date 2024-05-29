@@ -55,4 +55,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/register/validate/{boatregistration}/{hash}', [\App\Http\Controllers\BoatRegistrationController::class, 'validateRegistration']);
 Route::get('/register/cancel/{boatregistration}/{hash}', [\App\Http\Controllers\BoatRegistrationController::class, 'cancelRegistration']);
 
+Volt::route('boatid/{boat_id}', 'boats.show_public');
+
 require __DIR__.'/auth.php';

@@ -107,6 +107,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function paddleLabCustomer():\App\Models\Magento\CustomerEntity|null
     {
-        return \App\Models\Magento\CustomerEntity::firstWhere('email', 'josse@guerra.fslife.co.uk');// $this->email);
+        return \App\Models\Magento\CustomerEntity::firstWhere('email', $this->email);
     }
 }

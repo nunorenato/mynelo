@@ -30,6 +30,7 @@ class ProductResource extends Resource
                     ->required()
                     ->maxLength(255),
                 \Filament\Forms\Components\SpatieMediaLibraryFileUpload::make('photo')
+                    ->multiple()
                     ->collection('products'),
                 Forms\Components\TextInput::make('external_id')
                     ->numeric()

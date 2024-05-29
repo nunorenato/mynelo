@@ -196,6 +196,9 @@ new class extends Component{
         foreach($this->boat->getMedia('*') as $media){
             $boatMedia[] = $media->getUrl();
         }
+        foreach($this->boat->product->getMedia('*') as $media){
+            $boatMedia[] = $media->getUrl();
+        }
 
         $details = [
             ['name' => $this->boat->external_id, 'sub-value' => 'Boat ID','icon' => 'o-finger-print'],
