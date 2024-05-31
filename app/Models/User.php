@@ -4,12 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\GenderEnum;
+use App\Models\Magento\CustomerEntity;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -21,6 +23,8 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable, LogsActivity, HasRoles;
+
+    protected $connection = 'mysql';
 
     /**
      * The attributes that are mass assignable.
@@ -105,8 +109,9 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasRole(Role::findByName('Admin'));
     }
 
-    public function paddleLabCustomer():\App\Models\Magento\CustomerEntity|null
+    public function paddleLabCustomer():HasOne
     {
-        return \App\Models\Magento\CustomerEntity::firstWhere('email', $this->email);
+        return $this->hasOne(CustomerEntity::class, 'email', 'email');
+            // \App\Models\Magento\CustomerEntity::firstWhere('email', $this->email);
     }
 }

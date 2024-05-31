@@ -21,7 +21,7 @@ new class extends Component {
 
         $nonCustomer = \App\Models\Magento\PaddleLabSalesOrder::whereNull('customer_id')->where('customer_email', Auth::user()->email);
 
-        $this->customer = Auth::user()->paddleLabCustomer();
+        $this->customer = Auth::user()->paddleLabCustomer;
         if(!empty($this->customer)){
             // search for order done by the same email before beign a customer
             $this->orders = $this->customer->orders()->union($nonCustomer)->latest()->get();

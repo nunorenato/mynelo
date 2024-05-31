@@ -17,7 +17,7 @@ new class extends Component {
 
     public function mount():void{
 
-       // Gate::authorize('viewOrder', $this->order);
+        Gate::authorize('view', $this->order);
 
         $this->headers = [
             ['key' => 'product.image', 'label' => '', 'sortable' => false, 'class' => 'w-14 px-1 lg:px-3'],
@@ -108,7 +108,7 @@ new class extends Component {
             {{ $billing->street }}<br>
             {{ $billing->city }}<br>
             @isset($billing->region) {{ $billing->region }}<br>@endisset
-            {{ $billing->country->name }}
+            @isset($billing->country) {{ $billing->country->name }}<br>@endisset
         </x-mary-card>
         <x-mary-card title="Shipping Address">
             {{ $shipping->firstname }} {{ $shipping->lastname }} <br>
@@ -116,20 +116,20 @@ new class extends Component {
             {{ $shipping->street }}<br>
             {{ $shipping->city }}<br>
             @isset($shipping->region) {{ $shipping->region }}<br>@endisset
-            {{ $shipping->country->name }}
+            @isset($shipping->country) {{ $shipping->country->name }}<br>@endisset
         </x-mary-card>
         <x-mary-card title="Summary">
             <div class="grid grid-cols-2 gap-2">
                 <div class="text-right">Subtotal</div>
-                <div class="text-right">{{ Number::currency($order->subtotal_invoiced, 'EUR') }}</div>
+                <div class="text-right">{{ Number::currency($order->subtotal_invoiced??0, 'EUR') }}</div>
                 @isset($order->discount_invoiced)
                     <div class="text-right">Discount</div>
-                    <div class="text-right">{{ Number::currency($order->discount_invoiced, 'EUR') }}</div>
+                    <div class="text-right">{{ Number::currency($order->discount_invoiced??0, 'EUR') }}</div>
                 @endisset
                 <div class="text-right">Shipping & Handling</div>
-                <div class="text-right">{{ Number::currency($order->shipping_invoiced, 'EUR') }}</div>
+                <div class="text-right">{{ Number::currency($order->shipping_invoiced??0, 'EUR') }}</div>
                 <div class="text-right font-bold">Total</div>
-                <div class="text-right font-bold">{{ Number::currency($order->total_invoiced, 'EUR') }}</div>
+                <div class="text-right font-bold">{{ Number::currency($order->total_invoiced??0, 'EUR') }}</div>
             </div>
         </x-mary-card>
     </div>
