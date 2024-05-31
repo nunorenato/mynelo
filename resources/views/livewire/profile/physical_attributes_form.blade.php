@@ -7,8 +7,8 @@ use Illuminate\Validation\Rules\Enum;
 
 new class extends Component
 {
-    public ?float $height;
-    public ?float $weight;
+    public ?string $height;
+    public ?string $weight;
     public ?GenderEnum $gender;
 
     public array $genders;
@@ -30,6 +30,10 @@ new class extends Component
     public function updatePhysical():void
     {
         $user = Auth::user();
+
+        $this->height = Str::replace(',', '.', $this->height);
+        $this->weight = Str::replace(',', '.', $this->weight);
+
         $validated = $this->validate([
             'height' => ['nullable', 'numeric', 'min:0'],
             'weight' => ['nullable', 'numeric', 'min:0'],
