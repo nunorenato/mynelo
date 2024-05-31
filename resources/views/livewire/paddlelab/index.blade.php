@@ -24,7 +24,7 @@ new class extends Component {
         $this->customer = Auth::user()->paddleLabCustomer();
         if(!empty($this->customer)){
             // search for order done by the same email before beign a customer
-            $this->orders = $customer->orders()->union($nonCustomer)->latest()->get();
+            $this->orders = $this->customer->orders()->union($nonCustomer)->latest()->get();
         }
         else{
             $this->orders = $nonCustomer->latest()->get();
