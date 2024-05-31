@@ -23,18 +23,8 @@ class DatabaseSeeder extends Seeder
         // ]);
 
 
-
-       /* PersonType::create([
-            'id' => 1,
-            'name' => 'worker',
-        ]);*/
         $this->call([
-           // CountriesTableSeeder::class,
-            //ProductTypeSeeder::class,
-            //DisciplineSeeder::class,
-            //GoalSeeder::class,
-            //AttributeSeeder::class,
-            FieldSeeder::class,
+
         ]);
 
 

@@ -11,10 +11,11 @@ enum MagentoStatusEnum:string{
     case CLOSED = 'closed';
     case COMPLETE = 'complete';
     case CANCELED = 'canceled';
+    case PENDING_PAYMENT = 'pending_payment';
 
     public function cssClass():string{
         return match($this){
-            MagentoStatusEnum::PENDING => 'badge-warning',
+            MagentoStatusEnum::PENDING,MagentoStatusEnum::PENDING_PAYMENT => 'badge-warning',
             MagentoStatusEnum::PROCESSING => 'badge-info',
             MagentoStatusEnum::CANCELED => 'badge-error',
             MagentoStatusEnum::COMPLETE => 'badge-success',

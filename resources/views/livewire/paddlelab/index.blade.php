@@ -19,7 +19,7 @@ new class extends Component {
             ['key' => 'status', 'label' => 'Status'],
         ];
 
-        $nonCustomer = \App\Models\Magento\SalesOrder::whereNull('customer_id')->where('customer_email', 'jose@guerra.fslife.co.uk');
+        $nonCustomer = \App\Models\Magento\PaddleLabSalesOrder::whereNull('customer_id')->where('customer_email', Auth::user()->email);
 
         $this->customer = Auth::user()->paddleLabCustomer();
         if(!empty($this->customer)){

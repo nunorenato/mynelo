@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\Magento\SalesOrder;
+use App\Models\Magento\PaddleLabSalesOrder;
 use App\Enums\MagentoStatusEnum;
 use Livewire\Volt\Component;
 
 new class extends Component {
 
-    public SalesOrder $order;
+    public PaddleLabSalesOrder $order;
 
     public int $step;
     public array $headers;
@@ -17,7 +17,10 @@ new class extends Component {
 
     public function mount():void{
 
+       // Gate::authorize('viewOrder', $this->order);
+
         $this->headers = [
+            ['key' => 'product.image', 'label' => '', 'sortable' => false, 'class' => 'w-14 px-1 lg:px-3'],
             ['key' => 'name', 'label' => 'Product'],
             ['key' => 'qty_ordered', 'label' => 'Qty', 'class' => 'text-right'],
             ['key' => 'price', 'label' => 'Price', 'class' => 'text-right'],
@@ -69,6 +72,11 @@ new class extends Component {
     @endif
     <x-mary-card title="Items">
         <x-mary-table :headers="$headers" :rows="$order->items()->whereNull('parent_item_id')->get()" :cell-decoration="$cellDecoration">
+            @scope('cell_product.image', $item)
+                @isset($item->product)
+                    <x-mary-avatar :image="$item->product->image" class="!w-10 !rounded-lg" />
+                @endisset
+            @endscope
             @scope('cell_name', $row)
                 {{ $row->name }}
                 @isset($row->product_options['attributes_info'])

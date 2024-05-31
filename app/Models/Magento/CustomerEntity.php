@@ -18,6 +18,6 @@ class CustomerEntity extends Model
 
     public function orders():HasMany
     {
-        return $this->hasMany(SalesOrder::class, 'customer_id');
+        return $this->hasMany(PaddleLabSalesOrder::class, 'customer_id');
     }
 }

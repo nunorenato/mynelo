@@ -19,6 +19,8 @@ class Product extends Model implements HasMedia
 {
     use InteractsWithMedia;
 
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'name',
         'image',

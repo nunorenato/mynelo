@@ -42,8 +42,13 @@ export default {
         'blur-lg',
         'blur-sm',
         'p-0',
+        'w-14',
         {
             pattern: /badge.*/,
+        },
+        {
+            pattern: /px-*/,
+            variants: ['lg'],
         }
     ]
 };
