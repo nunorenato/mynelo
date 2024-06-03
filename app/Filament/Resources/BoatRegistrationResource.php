@@ -88,14 +88,29 @@ class BoatRegistrationResource extends Resource
                 Tables\Columns\TextColumn::make('boat.external_id')
                     ->label('Boat ID')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->url(function($record){
+                        return BoatResource::getUrl('edit', [
+                            'record' => $record->boat
+                        ]);
+                    }),
                 Tables\Columns\TextColumn::make('boat.model')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->url(function($record){
+                        return ProductResource::getUrl('edit', [
+                            'record' => $record->boat->product
+                        ]);
+                    }),
                 Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
                     ->sortable()
                     ->searchable()
+                    ->url(function($record){
+                        return UserResource::getUrl('edit', [
+                            'record' => $record->user
+                        ]);
+                    })
                     ->visible($table->getQueryStringIdentifier() != 'boatsRelationManager'),
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->dateTime()

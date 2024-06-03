@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Enums\DisciplineEnum;
 use App\Enums\ProductTypeEnum;
-use App\Http\Controllers\ImageController;
 use App\Services\MagentoApiClient;
+use App\Services\NeloApiClient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -51,8 +51,13 @@ class Product extends Model implements HasMedia
     }
 
     public function __get($key){
-        if($key == 'image')
-            return $this->getFirstMediaUrl('*');
+        if($key == 'image'){
+            $media = $this->getFirstMediaUrl('magento');
+            if(empty($media))
+                return $this->getFirstMediaUrl('*');
+
+            return $media;
+        }
         else
             return parent::__get($key);
     }
@@ -66,9 +71,10 @@ class Product extends Model implements HasMedia
     public static function getWithSync(int $externalID):Product|null
     {
         return Product::where('external_id', '=', $externalID)->firstOr(function() use ($externalID){
-            $response = Http::get(config('nelo.nelo_api_url')."/product/v2/$externalID");
-            if($response->ok()){
-                return self::createFromJSON($response->object());
+            $neloAPI = new NeloApiClient();
+            $apiProduct = $neloAPI->getProduct($externalID);
+            if(!empty($apiProduct)){
+                return self::createFromJSON($apiProduct);
             }
             else{
                 Log::error('Get product API Error', ['P_ID' => $externalID]);
@@ -126,9 +132,9 @@ class Product extends Model implements HasMedia
 
     public function updateFromAPI():void
     {
-        $response = Http::get(config('nelo.nelo_api_url')."/product/v2/{$this->external_id}");
-        if($response->ok()) {
-            $extProduct = $response->object();
+        $neloAPI = new NeloApiClient();
+        $extProduct = $neloAPI->getProduct($this->external_id);
+        if(!empty($extProduct)) {
 
             Log::info("Updating product from API with external id {$extProduct->id}");
 
@@ -141,7 +147,7 @@ class Product extends Model implements HasMedia
                 ]);
             }
 
-            if(!$this->hasMedia('*') && !empty($extProduct->image)){
+            if(!$this->hasMedia('products') && !empty($extProduct->image)){
                 try{
                     $this->addMediaFromUrl($extProduct->image)->toMediaCollection('products');
                 }
@@ -161,23 +167,26 @@ class Product extends Model implements HasMedia
 
     public function getOptionsFromAPI():void{
 
-        $response = Http::get(config('nelo.nelo_api_url')."/product/options/{$this->external_id}");
-        if($response->ok()) {
-            $options = $response->json();
-            $this->options()->detach();
-            foreach ($options as $option){
-                $subProduct = Product::where('external_id', $option['product']['id'])->get()->first();
-                //dd($subProduct);
-                if($subProduct != null){
-                    $attribute = is_numeric($option['attribute']['id'])?Attribute::where('external_id', $option['attribute']['id'])->value('id'):null;
-                    $this->options()->attach($subProduct->id, [
-                        'attribute_id' => $attribute,
-                        'standard' => $option['standard'],
-                    ]);
-                }
+        $neloAPI = new NeloApiClient();
+        $options = $neloAPI->getProductOptions($this->external_id);
 
+        if(empty($options) || count($options) == 0)
+            return;
+
+        $this->options()->detach();
+        foreach ($options as $option){
+            $subProduct = Product::where('external_id', $option['product']['id'])->get()->first();
+            //dd($subProduct);
+            if($subProduct != null){
+                $attribute = is_numeric($option['attribute']['id'])?Attribute::where('external_id', $option['attribute']['id'])->value('id'):null;
+                $this->options()->attach($subProduct->id, [
+                    'attribute_id' => $attribute,
+                    'standard' => $option['standard'],
+                ]);
             }
+
         }
+
     }
 
     public function updateFromMagento():void{
@@ -195,6 +204,22 @@ class Product extends Model implements HasMedia
                 $this->save();
                 break;
             }
+        }
+
+        if(!$this->hasMedia('magento')){
+            foreach ($product->media_gallery_entries as $media) {
+                if($media->media_type == 'image' && !$media->disabled){
+                    try{
+                        $localMedia = $this->addMediaFromUrl($media->file)->toMediaCollection('magento');
+                        $localMedia->order_column = $media->position;
+                        $localMedia->save();
+                    }
+                    catch(FileCannotBeAdded $fcbae){
+                        Log::error("File could not be added {$media->file}", [$fcbae->getMessage()]);
+                    }
+                }
+            }
+
         }
 
         //dump($product);

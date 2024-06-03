@@ -6,6 +6,7 @@ use App\Enums\AuthTypeEnum;
 
 class MagentoApiClient extends ApiClient
 {
+
     public function __construct(){
         parent::__construct(config('nelo.magento.api.url'));
         $this->setAuth(AuthTypeEnum::BearerToken, config('nelo.magento.api.token'));
@@ -56,7 +57,13 @@ class MagentoApiClient extends ApiClient
             'forceReload' => false,
         ]);
         if($response->ok()){
-            return $response->object();
+            $obj = $response->object();
+            foreach ($obj->media_gallery_entries as $media) {
+                if($media->media_type == 'image'){
+                    $media->file = 'https://paddle-lab.com/pub/media/catalog/product'.$media->file;
+                }
+            }
+            return $obj;
         }
         else
             return null;

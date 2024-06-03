@@ -36,9 +36,8 @@ class TestingController extends Controller
 
        // MagentoCouponJob::dispatch(User::find(1));
 
-        $boat = Boat::find(12);
-        dump($boat->marketValue());
-
+        $p = Product::find(50);
+        $p->getOptionsFromAPI();
 
         dump('ok');
 

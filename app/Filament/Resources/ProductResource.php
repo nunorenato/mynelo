@@ -31,7 +31,7 @@ class ProductResource extends Resource
                     ->maxLength(255),
                 \Filament\Forms\Components\SpatieMediaLibraryFileUpload::make('photo')
                     ->multiple()
-                    ->collection('products'),
+                    ->collection('*'),
                 Forms\Components\TextInput::make('external_id')
                     ->numeric()
                     ->default(null),
@@ -53,8 +53,10 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\SpatieMediaLibraryImageColumn::make('photo')
-                    ->collection('products')
-                    ->circular(),
+                    ->allCollections()
+                    ->circular()
+                    ->stacked()
+                    ->limit(3),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('external_id')
@@ -81,6 +83,18 @@ class ProductResource extends Resource
             ], layout: Tables\Enums\FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('update_nelo')
+                        ->label('Update from Nelo API')
+                        ->action(function (Product $product){
+                           $product->updateFromAPI();
+                        }),
+                    Tables\Actions\Action::make('update_magento')
+                        ->label('Update from Magento')
+                        ->action(function (Product $product){
+                           $product->updateFromMagento();
+                        }),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
