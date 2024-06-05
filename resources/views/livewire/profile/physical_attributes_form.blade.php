@@ -31,8 +31,10 @@ new class extends Component
     {
         $user = Auth::user();
 
-        $this->height = Str::replace(',', '.', $this->height);
-        $this->weight = Str::replace(',', '.', $this->weight);
+        if(isset($this->height))
+            $this->height = Str::replace(',', '.', $this->height);
+        if(isset($this->weight))
+            $this->weight = Str::replace(',', '.', $this->weight);
 
         $validated = $this->validate([
             'height' => ['nullable', 'numeric', 'min:0'],

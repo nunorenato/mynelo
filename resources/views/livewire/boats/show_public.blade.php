@@ -190,6 +190,7 @@ new #[Layout('layouts.public')] class extends Component{
             @isset($layup)
                 <x-basic-content :content="$layup"></x-basic-content>
             @endisset
+                <p><iframe width="560" height="315" src="https://www.youtube.com/embed/TQibdFLR78A" title="" frameBorder="0"   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"  allowFullScreen></iframe></p>
             @if(!empty($boatRegistration->boat->layuper))
                 <div class="mt-10">
                     <x-mary-avatar :title="$boat->layuper->name" subtitle="Layup" :image="$boat->layuper->photo" class="!w-14"></x-mary-avatar>

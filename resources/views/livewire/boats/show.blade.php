@@ -33,10 +33,10 @@ new class extends Component{
     public Illuminate\Database\Eloquent\Collection $upgradables;
 
     public ?int $seat_id;
-    public ?int $seat_position;
-    public ?int $seat_height;
+    public ?string $seat_position;
+    public ?string $seat_height;
     public ?int $footrest_id;
-    public ?int $footrest_position;
+    public ?string $footrest_position;
     public ?int $rudder_id;
     public ?string $paddle;
     public ?string $paddle_length;
@@ -53,14 +53,14 @@ new class extends Component{
     public \Illuminate\Support\Collection $repairLibrary;
 
     public array $rules = [
-        'seat_id' => ['numeric', 'nullable'],
-        'seat_position' => ['numeric', 'nullable'],
-        'seat_height' => ['numeric', 'nullable'],
-        'footrest_id' => ['numeric', 'nullable'],
-        'footrest_position' => ['numeric', 'nullable'],
-        'rudder_id' => ['numeric', 'nullable'],
-        'paddle' => ['string', 'nullable'],
-        'paddle_length' => ['string', 'nullable'],
+        'seat_id' => ['numeric', 'sometimes','nullable'],
+        'seat_position' => ['numeric', 'sometimes','nullable'],
+        'seat_height' => ['numeric', 'sometimes','nullable'],
+        'footrest_id' => ['numeric', 'sometimes','nullable'],
+        'footrest_position' => ['numeric', 'sometimes','nullable'],
+        'rudder_id' => ['numeric', 'sometimes','nullable'],
+        'paddle' => ['string', 'sometimes','nullable'],
+        'paddle_length' => ['string', 'sometimes','nullable'],
     ];
 
     public function mount():void
@@ -105,7 +105,7 @@ new class extends Component{
     {
 
         $validated = $this->validate();
-        //dump($validated);
+
         $this->boatRegistration->fill($validated);
         $this->boatRegistration->status = \App\Enums\StatusEnum::COMPLETE;
         $this->boatRegistration->save();

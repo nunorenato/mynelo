@@ -93,16 +93,19 @@ new class extends Component
     }
 
     private static function toDecimalSeconds(&$field):void{
-        if(!empty($field)){
-            if(Str::contains($field, '.')){
-                $t500 = CarbonInterval::createFromFormat('i:s.v', $field);
-            }
-            else{
-                $t500 = CarbonInterval::createFromFormat('i:s', $field);
-            }
-            $field = $t500->total('seconds');
-
+        if(empty($field)){
+            $field = null;
+            return;
         }
+
+        if(Str::contains($field, '.')){
+            $t500 = CarbonInterval::createFromFormat('i:s.v', $field);
+        }
+        else{
+            $t500 = CarbonInterval::createFromFormat('i:s', $field);
+        }
+        $field = $t500->total('seconds');
+
     }
 
 };
