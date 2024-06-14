@@ -25,6 +25,7 @@ new class extends Component{
     public bool $showUpgrades = false;
     public bool $showContent = false;
     public bool $showRepair = false;
+    public bool $showComponents = false;
 
     public Boat $boat;
     public Product $model;
@@ -215,9 +216,14 @@ new class extends Component{
         if(is_numeric($marketValue))
             $details[] = ['name' => '€'.$marketValue, 'sub-value' => 'Market value', 'icon' => 'o-banknotes', 'class' => $this->notComplete?'blur-sm':null];
 
+        $components = $products->where('product_type_id', '<>', ProductTypeEnum::Color->value)->where('type.fitting', false);
+        //dump($components->groupBy('type.name'));
+        $components = $components->groupBy('type.name');
+
         return [
             'details' => $details,
-            'fittings' => $products->where('product_type_id', '<>', ProductTypeEnum::Color->value),
+            'fittings' => $products->where('product_type_id', '<>', ProductTypeEnum::Color->value)->where('type.fitting', true),
+            'components' => $components,
             'colors' => $products->where('product_type_id', '=', ProductTypeEnum::Color->value),
             'setupFields' => empty($this->discipline)?[]:$this->discipline->fields,
             'aboutModel' => Content::where('path', 'model/about/'.strtolower(implode('_', $parts)))->first(),
@@ -428,6 +434,9 @@ new class extends Component{
 
         <!-- FITTINGS -->
         <x-mary-card title="Fittings" @class(['blur-sm' => $notComplete])>
+            <x-slot:menu>
+                <x-mary-button label="" icon="o-squares-plus" @click="$wire.showComponents = true;" class="btn-circle btn-sm" tooltip="View all components"></x-mary-button>
+            </x-slot:menu>
             @foreach($fittings as $product)
                 <x-mary-list-item :item="$product" sub-value="attribute.name">
                     <x-slot:avatar><x-mary-avatar :image="$product->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
@@ -574,4 +583,26 @@ new class extends Component{
             </x-slot:actions>
         </x-mary-form>
     </x-mary-modal>
+
+    <!-- COMPONENTS -->
+    <x-mary-drawer wire:model="showComponents" title="Components" subtitle="Need to replace a component no your boat?" right class="w-11/12 lg:w-1/2">
+        @foreach($components as $type=>$comps)
+            <h3>{{ Str::plural($type) }}</h3>
+        @foreach($comps as $option)
+
+            <x-mary-list-item :item="$option">
+                <x-slot:subValue>{!! $option->description !!}</x-slot:subValue>
+                <x-slot:avatar><x-mary-avatar :image="$option->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
+                @isset($option->attributes['magento_url'])
+                    <x-slot:actions>
+                        <x-mary-button label="Upgrade" :link="config('nelo.shop.base_product_url').$option->attributes['magento_url'].'.html'" external></x-mary-button>
+                    </x-slot:actions>
+                @endisset
+            </x-mary-list-item>
+            @endforeach
+        @endforeach
+        <x-slot:actions>
+            <x-mary-button label="Close" @click="$wire.showComponents = false"></x-mary-button>
+        </x-slot:actions>
+    </x-mary-drawer>
 </div>

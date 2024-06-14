@@ -106,56 +106,11 @@ class BoatSyncJob implements ShouldQueue
             }
         }
 
-        /**
-         * Colors
-         */
-        $response = Http::get(config('nelo.nelo_api_url')."/orders/colors/{$this->boat->external_id}");
-        if($response->ok()) {
-            Log::info('Adding colors to boat');
+        $this->boat->syncColors();
 
-            // apagamos sempre as cores
-            $this->boat->products()->detach($this->boat->products()->where('product_type_id', '=', ProductTypeEnum::Color->value)->get()->pluck('id'));
+        $this->boat->syncFittings();
 
-            foreach ($response->json() as $jsonColor){
-                $pColor = Product::firstOrCreate([
-                    'external_id' => $jsonColor['color']['id'],
-                ],[
-                    'name' => $jsonColor['color']['name'],
-                    'external_id' => $jsonColor['color']['id'],
-                    'attributes' => ['hex' => $jsonColor['color']['hex']],
-                    'product_type_id' => ProductTypeEnum::Color
-                ]);
-                Log::debug('Color', $pColor->toArray());
-                $this->boat->products()->attach($pColor->id, ['attribute_id' => Attribute::firstWhere('external_id', $jsonColor['id'])->id]);
-            }
-        }
-
-        /**
-         * Fittings
-         */
-        $response = Http::get(config('nelo.nelo_api_url')."/orders/fittings/{$this->boat->external_id}");
-        if($response->ok()) {
-            Log::info('Adding fittings to boat');
-
-            // apagamos todos os fittings
-            $this->boat->products()->detach($this->boat->products()->where('product_type_id', '<>', ProductTypeEnum::Color->value)->get()->pluck('id'));
-            foreach ($response->json() as $jsonProduct){
-
-                $pFitting = Product::getWithSync($jsonProduct['product']['id']);
-                if($pFitting == null)
-                    continue;
-
-                if($jsonProduct['attribute']==null)
-                    $attr = null;
-                else{
-                    $attribute = Attribute::firstWhere('external_id',$jsonProduct['attribute']['id']);
-                    $attr = $attribute->id;
-                }
-
-
-                $this->boat->products()->attach($pFitting->id, ['attribute_id' => $attr]);
-            }
-        }
+        $this->boat->syncComponents();
 
         /**
          * CO 2

@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\ProductTypeEnum;
 use App\Enums\StatusEnum;
 use App\Jobs\BoatSyncJob;
+use App\Services\NeloApiClient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -130,5 +132,81 @@ class Boat extends Model implements HasMedia
             };
         }
         return intval($this->product->retail_price * $depreciation);
+    }
+
+    public function syncComponents(){
+        // apagamos todos os fittings
+        $this->products()->detach($this->products()
+            ->where('product_type_id', '<>', ProductTypeEnum::Color->value)
+            ->whereRelation('type', 'fitting', false)
+            ->get()
+            ->pluck('id')
+        );
+
+        $neloApi = new NeloApiClient();
+        $components = $neloApi->getBoatComponents($this->external_id);
+        foreach ($components as $component){
+
+            $this->addProductFromAPI($component['product']['id'], empty($component['attribute'])?null:$component['attribute']['id']);
+
+        }
+    }
+    public function syncFittings(){
+        // apagamos todos os fittings
+        $this->products()->detach($this->products()
+            ->where('product_type_id', '<>', ProductTypeEnum::Color->value)
+            ->whereRelation('type', 'fitting', true)
+            ->get()
+            ->pluck('id')
+        );
+
+        $neloApi = new NeloApiClient();
+        $components = $neloApi->getBoatFittings($this->external_id);
+        foreach ($components as $component){
+
+            $this->addProductFromAPI($component['product']['id'], empty($component['attribute'])?null:$component['attribute']['id']);
+
+        }
+    }
+
+    public function syncColors():void{
+
+        $neloApi = new NeloApiClient();
+        $colors = $neloApi->getBoatColors($this->external_id);
+
+        Log::info('Adding colors to boat');
+
+        // apagamos sempre as cores
+        $this->products()->detach($this->products()->where('product_type_id', '=', ProductTypeEnum::Color->value)->get()->pluck('id'));
+
+        foreach ($colors as $jsonColor){
+            $pColor = Product::firstOrCreate([
+                'external_id' => $jsonColor['color']['id'],
+            ],[
+                'name' => $jsonColor['color']['name'],
+                'external_id' => $jsonColor['color']['id'],
+                'attributes' => ['hex' => $jsonColor['color']['hex']],
+                'product_type_id' => ProductTypeEnum::Color
+            ]);
+            Log::debug('Color', $pColor->toArray());
+            $this->products()->attach($pColor->id, ['attribute_id' => Attribute::firstWhere('external_id', $jsonColor['id'])->id]);
+        }
+    }
+
+    public function addProductFromAPI($externalProductId, $externalAttributeId = null):void{
+
+        $product = Product::getWithSync($externalProductId);
+        if($product == null)
+            return;
+
+        if($externalAttributeId != null){
+            $attribute = Attribute::firstWhere('external_id',$externalAttributeId);
+            $attr = $attribute->id;
+        }
+        else
+            $attr = null;
+
+
+        $this->products()->attach($product->id, ['attribute_id' => $attr]);
     }
 }

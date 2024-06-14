@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\Worker;
 use App\Services\MagentoApiClient;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -35,9 +36,9 @@ class TestingController extends Controller
     {
 
        // MagentoCouponJob::dispatch(User::find(1));
-
-        $p = Product::find(50);
-        $p->getOptionsFromAPI();
+        $boat = Boat::firstWhere('external_id', 134600);
+        //$boat->syncComponents();
+        BoatSyncJob::dispatch($boat, $boat->external_id);
 
         dump('ok');
 

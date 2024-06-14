@@ -33,4 +33,34 @@ class NeloApiClient extends ApiClient
             return [];
     }
 
+    public function getBoatComponents(string $id):array
+    {
+        $response = $this->get("/orders/components/$id");
+        if($response->ok()){
+            return $response->json();
+        }
+        else
+            return [];
+    }
+
+    public function getBoatFittings(string $id):array
+    {
+        $response = $this->get("/orders/fittings/$id");
+        if($response->ok()){
+            return $response->json();
+        }
+        else
+            return [];
+    }
+
+    public function getBoatColors(string $id):array
+    {
+        $response = $this->get("/orders/colors/$id");
+        if($response->ok()){
+            return $response->json();
+        }
+        else
+            return [];
+    }
+
 }
