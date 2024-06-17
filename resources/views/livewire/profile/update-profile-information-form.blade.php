@@ -69,6 +69,8 @@ new class extends Component
 
         $this->dispatch('profile-updated', name: $user->name);
 
+        \App\Jobs\NeloUpdateUserJob::dispatch($user);
+
         activity()
             ->on($user)
             ->event('updated profile info')

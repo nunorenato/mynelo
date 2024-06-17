@@ -134,7 +134,7 @@ class Boat extends Model implements HasMedia
         return intval($this->product->retail_price * $depreciation);
     }
 
-    public function syncComponents(){
+    public function syncComponents():void{
         // apagamos todos os fittings
         $this->products()->detach($this->products()
             ->where('product_type_id', '<>', ProductTypeEnum::Color->value)
@@ -151,7 +151,7 @@ class Boat extends Model implements HasMedia
 
         }
     }
-    public function syncFittings(){
+    public function syncFittings():void{
         // apagamos todos os fittings
         $this->products()->detach($this->products()
             ->where('product_type_id', '<>', ProductTypeEnum::Color->value)

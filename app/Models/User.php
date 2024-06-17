@@ -51,6 +51,7 @@ class User extends Authenticatable implements FilamentUser
         'extras',
         'extras->coupon',
         'extras->coupon_used',
+        'external_id',
     ];
 
     /**

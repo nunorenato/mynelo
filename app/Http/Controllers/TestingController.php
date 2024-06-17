@@ -17,6 +17,7 @@ use App\Models\ProductType;
 use App\Models\User;
 use App\Models\Worker;
 use App\Services\MagentoApiClient;
+use App\Services\NeloApiClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -35,10 +36,14 @@ class TestingController extends Controller
     public function index()
     {
 
-       // MagentoCouponJob::dispatch(User::find(1));
-        $boat = Boat::firstWhere('external_id', 134600);
-        //$boat->syncComponents();
-        BoatSyncJob::dispatch($boat, $boat->external_id);
+        $nelo = new NeloApiClient();
+
+        $user = User::find(1);
+        $nelo->storeOwner($user);
+
+        //$user->boats->each(function (BoatRegistration $boatRegistration) use ($nelo){
+           $nelo->storeRegistration($user->boats()->find(11));
+        //});
 
         dump('ok');
 

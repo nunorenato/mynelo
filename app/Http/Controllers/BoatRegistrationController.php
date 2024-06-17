@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\StatusEnum;
 use App\Jobs\BoatSyncJob;
+use App\Jobs\NeloStoreBoatRegistrationJob;
 use App\Mail\RegistrationResultMail;
 use App\Models\BoatRegistration;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ use Illuminate\View\View;
 
 class BoatRegistrationController extends Controller
 {
-    public function index()
+    /*public function index()
     {
         return BoatRegistration::all();
     }
@@ -65,7 +66,7 @@ class BoatRegistrationController extends Controller
         $boatRegistration->delete();
 
         return response()->json();
-    }
+    }*/
 
     public function validateRegistration(BoatRegistration $boatregistration, $hash):View
     {
@@ -90,6 +91,7 @@ class BoatRegistrationController extends Controller
          */
         if($newStatus == StatusEnum::VALIDATED){
             $boatRegistration->boat->deletePreviousOwners($boatRegistration->id);
+            NeloStoreBoatRegistrationJob::dispatch($boatRegistration);
         }
 
         $boatRegistration->status = $newStatus;

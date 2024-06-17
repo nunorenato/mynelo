@@ -118,6 +118,8 @@ new class extends Component{
             ->withProperties($validated)
             ->log('Boat registration My Setup update');
 
+        \App\Jobs\NeloUpdateBoatRegistrationJob::dispatch($this->boatRegistration);
+
         $this->showSetup = false;
         $this->notComplete = false;
     }

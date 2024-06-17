@@ -35,6 +35,7 @@ new #[Layout('layouts.guest')] class extends Component {
 
         Auth::login($user);
 
+        \App\Jobs\NeloStoreUserJob::dispatch($user);
         MagentoCouponJob::dispatch($user);
 
         $this->redirect(RouteServiceProvider::HOME, navigate: true);
