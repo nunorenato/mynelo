@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
 
 
         $this->call([
-            OwnerSyncSeeder::class,
+            BoatSyncedSeeder::class,
         ]);
 
 

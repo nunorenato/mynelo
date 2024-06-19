@@ -28,11 +28,16 @@ new #[Layout('layouts.public')] class extends Component{
 
     public bool $notComplete = true;
 
-
+    public function boot():void{
+        $this->boat = Boat::getWithSync($this->boat_id);
+    }
 
     public function mount():void
     {
-        $this->boat = Boat::where('external_id', $this->boat_id)->firstOrFail();
+
+        if(!$this->boat->synced)
+            return;
+
         $this->model = $this->boat->product;
         $this->discipline = $this->model->discipline;
 
@@ -46,16 +51,6 @@ new #[Layout('layouts.public')] class extends Component{
 
     public function with():array{
 
-        $products = $this->boat->products()
-            ->get()
-            ->transform(function(Product $item, $key){
-            //dump($item->pivot);
-                if(is_numeric($item->pivot->attribute_id)){
-                    $item->attribute = Attribute::find($item->pivot->attribute_id);
-                }
-                return $item;
-        });
-
         /**
          * sacar o nome do modelo
          */
@@ -66,6 +61,38 @@ new #[Layout('layouts.public')] class extends Component{
         // TODO validar se é um tamanho
         array_pop($parts);
 
+        $details = [
+            ['name' => $this->boat->external_id, 'sub-value' => 'Boat ID','icon' => 'o-finger-print'],
+            ['name' => $this->boat->model, 'sub-value' => 'Boat model', 'icon' => 'o-cube-transparent'],
+        ];
+        if(!empty($this->boat->finished_at))
+            $details[] = ['name' => substr($this->boat->finished_at, 0, 10), 'sub-value' => 'Finished date', 'icon' => 'o-calendar'];
+        if(is_numeric($this->boat->finished_weight))
+            $details[] = ['name' => $this->boat->finished_weight, 'sub-value' => 'Final weight (kg)', 'icon' => 'o-scale'];
+        if(is_numeric($this->boat->co2))
+            $details[] = ['name' => $this->boat->co2, 'sub-value' => 'Carbon footprint (kg co2 eq.)', 'icon' => 'carbon.carbon-accounting'];
+
+
+        if(!$this->boat->synced){
+            return [
+                'details' => $details,
+                'fittings' => [],
+                'colors' => [],
+                'aboutModel' => Content::where('path', 'model/about/'.strtolower(implode('_', $parts)))->first(),
+                'boatMedia' => [],
+            ];
+        }
+
+        $products = $this->boat->products()
+            ->get()
+            ->transform(function(Product $item, $key){
+            //dump($item->pivot);
+                if(is_numeric($item->pivot->attribute_id)){
+                    $item->attribute = Attribute::find($item->pivot->attribute_id);
+                }
+                return $item;
+        });
+
         $boatMedia = [];
         foreach($this->boat->getMedia('*') as $media){
             $boatMedia[] = $media->getUrl();
@@ -74,24 +101,14 @@ new #[Layout('layouts.public')] class extends Component{
             $boatMedia[] = $media->getUrl();
         }
 
-        $details = [
-            ['name' => $this->boat->external_id, 'sub-value' => 'Boat ID','icon' => 'o-finger-print'],
-            ['name' => $this->boat->model, 'sub-value' => 'Boat model', 'icon' => 'o-cube-transparent'],
-        ];
 
-        if(!empty($this->boat->finished_at))
-            $details[] = ['name' => substr($this->boat->finished_at, 0, 10), 'sub-value' => 'Finished date', 'icon' => 'o-calendar'];
-        if(is_numeric($this->boat->finished_weight))
-            $details[] = ['name' => $this->boat->finished_weight, 'sub-value' => 'Final weight (kg)', 'icon' => 'o-scale'];
-        if(is_numeric($this->boat->co2))
-            $details[] = ['name' => $this->boat->co2, 'sub-value' => 'Carbon footprint (kg co2 eq.)', 'icon' => 'carbon.carbon-accounting'];
         $marketValue = $this->boat->marketValue();
         if(is_numeric($marketValue))
             $details[] = ['name' => '€'.$marketValue, 'sub-value' => 'Market value', 'icon' => 'o-banknotes',];
 
         return [
             'details' => $details,
-            'fittings' => $products->where('product_type_id', '<>', ProductTypeEnum::Color->value),
+            'fittings' => $products->where('product_type_id', '<>', ProductTypeEnum::Color->value)->where('type.fitting', true),
             'colors' => $products->where('product_type_id', '=', ProductTypeEnum::Color->value),
             'aboutModel' => Content::where('path', 'model/about/'.strtolower(implode('_', $parts)))->first(),
             'boatMedia' => $boatMedia,
@@ -126,7 +143,7 @@ new #[Layout('layouts.public')] class extends Component{
     <x-mary-header title="{{$boat->model}}">
     </x-mary-header>
 
-    @if(count($boatMedia) > 0)
+    @if(count($boatMedia) > 0 && $boat->synced)
     <x-mary-image-gallery :images="$boatMedia" class="h-40 rounded-box mb-5"></x-mary-image-gallery>
     @endif
 
@@ -153,50 +170,60 @@ new #[Layout('layouts.public')] class extends Component{
         </x-mary-card>
 
         <!-- FITTINGS -->
-        <x-mary-card title="Fittings">
-            @foreach($fittings as $product)
-                <x-mary-list-item :item="$product" sub-value="attribute.name">
-                    <x-slot:avatar><x-mary-avatar :image="$product->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
-                </x-mary-list-item>
-            @endforeach
-            @isset($boatRegistration->boat->assembler)
-                <div class="mt-10">
-                    <x-mary-avatar :title="$boat->assembler->name" subtitle="Assembly" :image="$boat->assembler->photo" class="!w-14"></x-mary-avatar>
-                </div>
-            @endisset
-            @isset($boatRegistration->boat->evaluator)
-                <div class="mt-10">
-                    <x-mary-avatar :title="$boat->evaluator->name" subtitle="Quality control" :image="$boat->evaluator->photo" class="!w-14"></x-mary-avatar>
-                </div>
-            @endisset
-        </x-mary-card>
-
-        <!-- DESIGN -->
-        <x-mary-card title="Design">
-            @foreach($colors as $product)
-                <x-mary-list-item :item="$product" sub-value="attribute.name">
-                    <x-slot:avatar><div style="background-color: {{ $product->attributes['hex']??'#ffffff' }};" class="w-11 h-11 rounded-full"></div></x-slot:avatar>
-                </x-mary-list-item>
-            @endforeach
-                @if(!empty($boatRegistration->boat->painter))
+        @if(!$boat->synced)
+            <div wire:poll.1s>
+                <x-mary-card title="Loading more details" subtitle="Please wait while we load all the details for the boat.">
+                    <x-mary-loading class="loading-bars loading-lg" />
+                </x-mary-card>
+            </div>
+        @else
+            <x-mary-card title="Fittings">
+                @foreach($fittings as $product)
+                    <x-mary-list-item :item="$product" sub-value="attribute.name">
+                        <x-slot:avatar><x-mary-avatar :image="$product->image" class="!w-11"></x-mary-avatar></x-slot:avatar>
+                    </x-mary-list-item>
+                @endforeach
+                @isset($boatRegistration->boat->assembler)
                     <div class="mt-10">
-                        <x-mary-avatar :title="$boat->painter->name" subtitle="Painter" :image="$boat->painter->photo" class="!w-14"></x-mary-avatar>
+                        <x-mary-avatar :title="$boat->assembler->name" subtitle="Assembly" :image="$boat->assembler->photo" class="!w-14"></x-mary-avatar>
+                    </div>
+                @endisset
+                @isset($boatRegistration->boat->evaluator)
+                    <div class="mt-10">
+                        <x-mary-avatar :title="$boat->evaluator->name" subtitle="Quality control" :image="$boat->evaluator->photo" class="!w-14"></x-mary-avatar>
+                    </div>
+                @endisset
+            </x-mary-card>
+
+            <!-- DESIGN -->
+            <x-mary-card title="Design">
+                @foreach($colors as $product)
+                    <x-mary-list-item :item="$product" sub-value="attribute.name">
+                        <x-slot:avatar><div style="background-color: {{ $product->attributes['hex']??'#ffffff' }};" class="w-11 h-11 rounded-full"></div></x-slot:avatar>
+                    </x-mary-list-item>
+                @endforeach
+                    @if(!empty($boatRegistration->boat->painter))
+                        <div class="mt-10">
+                            <x-mary-avatar :title="$boat->painter->name" subtitle="Painter" :image="$boat->painter->photo" class="!w-14"></x-mary-avatar>
+                        </div>
+                    @endif
+            </x-mary-card>
+
+            <!-- LAYUP -->
+            <x-mary-card title="Layup">
+                @isset($layup)
+                    <x-basic-content :content="$layup"></x-basic-content>
+                @endisset
+                @if(Str::contains($boat->model, '400'))
+                    <p><iframe width="560" height="315" src="https://www.youtube.com/embed/TQibdFLR78A" title="" frameBorder="0"   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"  allowFullScreen></iframe></p>
+                @endif
+                @if(!empty($boatRegistration->boat->layuper))
+                    <div class="mt-10">
+                        <x-mary-avatar :title="$boat->layuper->name" subtitle="Layup" :image="$boat->layuper->photo" class="!w-14"></x-mary-avatar>
                     </div>
                 @endif
-        </x-mary-card>
-
-        <!-- LAYUP -->
-        <x-mary-card title="Layup">
-            @isset($layup)
-                <x-basic-content :content="$layup"></x-basic-content>
-            @endisset
-                <p><iframe width="560" height="315" src="https://www.youtube.com/embed/TQibdFLR78A" title="" frameBorder="0"   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"  allowFullScreen></iframe></p>
-            @if(!empty($boatRegistration->boat->layuper))
-                <div class="mt-10">
-                    <x-mary-avatar :title="$boat->layuper->name" subtitle="Layup" :image="$boat->layuper->photo" class="!w-14"></x-mary-avatar>
-                </div>
-            @endif
-        </x-mary-card>
+            </x-mary-card>
+        @endif
     </div>
 
     <x-mary-drawer wire:model="showContent" :title="$selectedContent->title??''" right class="w-11/12 lg:w-1/2">

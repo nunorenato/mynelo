@@ -123,6 +123,7 @@ class BoatSyncJob implements ShouldQueue
             }
         }
 
+        $this->boat->synced = true;
         $this->boat->save();
     }
 

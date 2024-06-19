@@ -29,11 +29,13 @@ class Boat extends Model implements HasMedia
         'seller',
         'co2',
         'voucher_used',
+        'synced',
     ];
 
     protected $casts = [
         'finished_at' => 'date',
-        'vouched_used' => 'boolean'
+        'vouched_used' => 'boolean',
+        'synced' => 'boolean',
     ];
 
     public function product():BelongsTo{
@@ -83,7 +85,8 @@ class Boat extends Model implements HasMedia
                     'model' => $boat->model,
                     'ideal_weight' => $boat->ideal_weight,
                     'finished_weight' => $boat->final_weight,
-                    'finished_at' => $boat->finish_date
+                    'finished_at' => $boat->finish_date,
+                    'synced' => false,
                 ]);
 
                 Log::info('Queue boat for full sync');
