@@ -41,6 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //    Volt::route('boats', 'boats.index')->name('boats'); TROCAR SE FOR PRECISO DINAMISMO NA PAGINA
 
     Route::view('boats', 'livewire.boats.index')->name('boats');
+    Volt::route('boats/order/', 'boats.order')->name('boats.order');
     Volt::route('boats/{boatRegistration}', 'boats.show')->name('boats.show');
 
     Volt::route('paddle-lab', 'paddlelab.index')->name('paddle-lab');

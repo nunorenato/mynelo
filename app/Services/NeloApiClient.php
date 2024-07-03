@@ -110,4 +110,35 @@ class NeloApiClient extends ApiClient
         }
     }
 
+    public function getBoatChooserFrom():string{
+        $response = $this->get('/web/boatchooser');
+        if($response->ok()){
+            return $response->body();
+        }
+        else{
+            return '';
+        }
+    }
+
+    public function getBoatChooserQuestions():array{
+        $response = $this->get('/boatchooser/questions/grouped');
+        if($response->ok()){
+            return $response->json();
+        }
+        else{
+            return [];
+        }
+    }
+
+    public function chooseBoat(array $answers):array{
+        $response = $this->post('/boatchooser/choose', $answers);
+        if($response->ok()){
+            return $response->json();
+        }
+        else{
+            Log::error('Error choosing boat', $answers);
+            return [];
+        }
+    }
+
 }

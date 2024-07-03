@@ -43,6 +43,9 @@ export default {
         'blur-sm',
         'p-0',
         'w-14',
+        'w-2/3',
+        'max-w-5xl',
+        'bg-base-200',
         {
             pattern: /badge.*/,
         },

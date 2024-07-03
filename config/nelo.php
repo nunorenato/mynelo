@@ -21,4 +21,10 @@ return [
         ],
         'coupon_rule' => env('MAGENTO_COUPON_RULE'),
     ],
+
+    'layups' => ['E', 'F', 'G', 'SCS', 'WWR', 'FC', 'P1'],
+
+    'myorder' => [
+        'base_url' => 'https://myorder.nelo.eu/',
+    ]
 ];

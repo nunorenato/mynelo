@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileCannotBeAdded;
@@ -37,6 +38,7 @@ class Product extends Model implements HasMedia
     protected $casts = [
         'attributes' => 'json',
         'external_id' => 'int',
+        'product_type_id' => ProductTypeEnum::class,
     ];
 
 
@@ -223,5 +225,21 @@ class Product extends Model implements HasMedia
         }
 
         //dump($product);
+    }
+
+    /**
+     * Returns the product name without the layout part
+     *
+     * @return string
+     */
+    public function nameWithoutLayup():string{
+
+        if($this->product_type_id != ProductTypeEnum::Boat){
+            return $this->name;
+        }
+
+        // TODO para ja fazemos com o str_pos. Depois podemos tentar com o array que está em config/nelo
+        $pos = strrpos($this->name, ' ');
+        return Str::substr($this->name, 0, $pos);
     }
 }
