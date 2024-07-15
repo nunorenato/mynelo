@@ -120,8 +120,8 @@ class NeloApiClient extends ApiClient
         }
     }
 
-    public function getBoatChooserQuestions():array{
-        $response = $this->get('/boatchooser/questions/grouped');
+    public function getBoatChooserQuestions($quizId):array{
+        $response = $this->get("/boatchooser/quiz/$quizId");
         if($response->ok()){
             return $response->json();
         }

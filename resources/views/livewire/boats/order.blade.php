@@ -3,6 +3,7 @@
 use Livewire\Volt\Component;
 
 new class extends Component{
+    use \Mary\Traits\Toast;
 
     public bool $showChooser = false;
     public bool $showResults = false;
@@ -14,14 +15,24 @@ new class extends Component{
 
     public int $heightId = 0;
     public int $weightId = 0;
+    public ?int $boatChooserDiscipline;
+    public array $disciplines = [
+            ['id' => 1, 'name' => 'Flatwater racing'],
+            ['id' => 2, 'name' => 'Fitness'],
+        ];
 
     public function loadChooser(){
 
         $this->showChooser = false;
 
+        if(empty($this->boatChooserDiscipline)){
+            $this->error('Please select a discipline');
+            return;
+        }
+
         $api = new \App\Services\NeloApiClient();
 
-        $this->boatChooser = $api->getBoatChooserQuestions();
+        $this->boatChooser = $api->getBoatChooserQuestions($this->boatChooserDiscipline);
 
         $user = Auth::user();
 
@@ -76,6 +87,7 @@ new class extends Component{
         });
 
         $api = new \App\Services\NeloApiClient();
+       // dump($questions->toArray());
         $boats = $api->chooseBoat($questions->toArray());
 
         //dump($boats);
@@ -109,8 +121,13 @@ new class extends Component{
         <x-mary-card title="Choose your boat" subtitle="Find the best model for you">
             <p class="mb-4">Not sure what model fits you best? From you physical attributes, paddling style and preferences we can help you
             find which of our models will fit you better.</p>
-            <x-mary-button label="Give it a go" icon="tabler.wand" class="btn-accent" wire:click="loadChooser()" spinner></x-mary-button>
-            <span class="text-sm">Only available for flatwater racing boats</span>
+            <x-mary-select wire:model="boatChooserDiscipline" :options="$disciplines" placeholder="Select a discipline">
+                <x-slot:append>
+                    <x-mary-button label="Give it a go" icon="tabler.wand" class="btn-accent rounded-s-none" wire:click="loadChooser()" spinner></x-mary-button>
+                </x-slot:append>
+            </x-mary-select>
+
+            <span class="text-sm">More options will be available soon.</span>
             <div>
 
             </div>
@@ -152,10 +169,12 @@ new class extends Component{
             @isset($boat)
             <x-mary-card :title="$boat->nameWithoutLayup()">
                 <x-slot:figure>
-                    <img src="{{ $boat->image }}">
+                    <img src="{{ $boat->image }}" alt="{{$boat->nameWithoutLayup()}}">
                 </x-slot:figure>
                 <x-slot:actions>
-                    <x-mary-button label="Configure yours" link="{{ config('nelo.myorder.base_url') }}?product={{ $boat->nameWithoutLayup() }}" external></x-mary-button>
+                    @if(!Str::contains($boat->name, 'Viper', true))
+                        <x-mary-button label="Configure yours" link="{{ config('nelo.myorder.base_url') }}?product={{ $boat->nameWithoutLayup() }}" external></x-mary-button>
+                    @endif
                 </x-slot:actions>
             </x-mary-card>
                 @endisset

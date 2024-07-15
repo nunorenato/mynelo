@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
 
 
         $this->call([
-            VanquishSeeder::class,
+            FitnessSeeder::class,
         ]);
 
 
