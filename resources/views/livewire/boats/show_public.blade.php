@@ -29,13 +29,19 @@ new #[Layout('layouts.public')] class extends Component{
     public bool $notComplete = true;
 
     public function boot():void{
-        $this->boat = Boat::getWithSync($this->boat_id);
+        $boat = Boat::getWithSync($this->boat_id);
+        if(empty($boat)){
+            $this->redirectRoute('boat-not-found');
+            return;
+        }
+
+        $this->boat = $boat;
     }
 
     public function mount():void
     {
 
-        if(!$this->boat->synced)
+        if(empty($this->boat) || !$this->boat?->synced)
             return;
 
         $this->model = $this->boat->product;

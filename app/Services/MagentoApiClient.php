@@ -35,12 +35,11 @@ class MagentoApiClient extends ApiClient
 
     public function searchCouponByCode(string $code):object|null
     {
-        $response = $this->get('/coupons/search', [
+        $obj = $this->getObject('/coupons/search', [
             'searchCriteria[filterGroups][0][filters][0][field]' => 'code',
             'searchCriteria[filterGroups][0][filters][0][value]' => $code
         ]);
-        if($response->ok()){
-            $obj = $response->object();
+        if($obj != null){
             if(count($obj->items) > 0)
                 return $obj->items[0];
             else
@@ -51,13 +50,12 @@ class MagentoApiClient extends ApiClient
     }
 
     public function getProduct(string $sku):object|null{
-        $response = $this->get('/products/' . $sku, [
+        $obj = $this->getObject('/products/' . $sku, [
             'editMode' => false,
             'storeId' => 6,
             'forceReload' => false,
         ]);
-        if($response->ok()){
-            $obj = $response->object();
+        if($obj != null){
             foreach ($obj->media_gallery_entries as $media) {
                 if($media->media_type == 'image'){
                     $media->file = 'https://paddle-lab.com/pub/media/catalog/product'.$media->file;

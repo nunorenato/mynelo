@@ -9,6 +9,7 @@ namespace App\Models;
     class Discipline extends Model {
         protected $fillable = [
         'name',
+            'playlist',
         ];
 
         public function fields():BelongsToMany

@@ -26,5 +26,11 @@ return [
 
     'myorder' => [
         'base_url' => 'https://myorder.nelo.eu/',
-    ]
+    ],
+
+    'youtube' => [
+        'base_url' => 'https://www.googleapis.com/youtube/v3',
+        'api_key' => env('YOUTUBE_API_KEY'),
+        'api_key_name' => 'key',
+    ],
 ];

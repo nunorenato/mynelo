@@ -20,7 +20,7 @@ class BoatRegistrationResource extends Resource
 {
     protected static ?string $model = BoatRegistration::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'tabler-registered';
     protected static ?int $navigationSort = 10;
 
     public static function getNavigationBadge(): ?string

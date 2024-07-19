@@ -27,6 +27,8 @@ class DisciplineResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('playlist')
+                    ->label('Youtube Playlist Id'),
             ]);
     }
 

@@ -19,16 +19,19 @@ new class extends Component {
             ['key' => 'status', 'label' => 'Status'],
         ];
 
-        $nonCustomer = \App\Models\Magento\PaddleLabSalesOrder::whereNull('customer_id')->where('customer_email', Auth::user()->email);
-
         $this->customer = Auth::user()->paddleLabCustomer;
+
+        /*$nonCustomer = \App\Models\Magento\PaddleLabSalesOrder::whereNull('customer_id')->where('customer_email', Auth::user()->email);
+
         if(!empty($this->customer)){
             // search for order done by the same email before beign a customer
             $this->orders = $this->customer->orders()->union($nonCustomer)->latest()->get();
         }
         else{
             $this->orders = $nonCustomer->latest()->get();
-        }
+        }*/
+
+        $this->orders = \App\Models\Magento\PaddleLabSalesOrder::allOrders(Auth::user());
     }
 
 }

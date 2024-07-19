@@ -44,6 +44,9 @@ export default {
         'p-0',
         'w-14',
         'w-2/3',
+        'w-full',
+        'w-auto',
+        'max-w-full',
         'max-w-5xl',
         'bg-base-200',
         {
@@ -52,6 +55,9 @@ export default {
         {
             pattern: /px-*/,
             variants: ['lg'],
+        },
+        {
+            pattern: /text-sky-*/,
         }
     ]
 };

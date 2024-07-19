@@ -37,7 +37,7 @@ Route::get('/logout', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
    //Volt::route('profile', 'profile.index')->name('profile');
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Volt::route('dashboard', 'dashboard')->name('dashboard');
 //    Volt::route('boats', 'boats.index')->name('boats'); TROCAR SE FOR PRECISO DINAMISMO NA PAGINA
 
     Route::view('boats', 'livewire.boats.index')->name('boats');
@@ -53,9 +53,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('retry_sync/{boatRegistration}', [\App\Http\Controllers\BoatRegistrationController::class, 'retrySync']);
 });
 
+/**
+ * Boat registratiion validation
+ */
 Route::get('/register/validate/{boatregistration}/{hash}', [\App\Http\Controllers\BoatRegistrationController::class, 'validateRegistration']);
 Route::get('/register/cancel/{boatregistration}/{hash}', [\App\Http\Controllers\BoatRegistrationController::class, 'cancelRegistration']);
 
+/**
+ * QR Code
+ */
 Volt::route('boatid/{boat_id}', 'boats.show_public');
+
+/**
+ * Error pages
+ */
+Route::view('/boat-not-found', 'errors.qrcode-notfound')->name('boat-not-found');
 
 require __DIR__.'/auth.php';

@@ -18,8 +18,10 @@ use App\Models\User;
 use App\Models\Worker;
 use App\Services\MagentoApiClient;
 use App\Services\NeloApiClient;
+use App\Services\YoutubeApiClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Benchmark;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -36,14 +38,13 @@ class TestingController extends Controller
     public function index()
     {
 
-        $nelo = new NeloApiClient();
+        $youtube = new YoutubeApiClient();
 
-        $user = User::find(1);
-        $nelo->storeOwner($user);
+        Benchmark::dd(fn() => $youtube->getPlaylistItems('PL97bnGYVvtIElcYvqUwSvReh9qqo8uASH'), 1);
 
-        //$user->boats->each(function (BoatRegistration $boatRegistration) use ($nelo){
-           $nelo->storeRegistration($user->boats()->find(11));
-        //});
+        //$x = $youtube->getPlaylistItems('PL97bnGYVvtIElcYvqUwSvReh9qqo8uASH');
+
+        //dump($x);
 
         dump('ok');
 

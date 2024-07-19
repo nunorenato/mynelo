@@ -19,52 +19,27 @@ class NeloApiClient extends ApiClient
 
 
     public function getProduct(string $id):object|null{
-        $response = $this->get("/product/v2/$id");
-        if($response->ok()){
-            return $response->object();
-        }
-        else
-            return null;
+        return $this->getObject("/product/v2/$id");
     }
 
     public function getProductOptions(string $id):array
     {
-        $response = $this->get("/product/options/$id");
-        if($response->ok()){
-            return $response->json();
-        }
-        else
-            return [];
+        return $this->getArray("/product/options/$id");
     }
 
     public function getBoatComponents(string $id):array
     {
-        $response = $this->get("/orders/components/$id");
-        if($response->ok()){
-            return $response->json();
-        }
-        else
-            return [];
+        return $this->getArray("/orders/components/$id");
     }
 
     public function getBoatFittings(string $id):array
     {
-        $response = $this->get("/orders/fittings/$id");
-        if($response->ok()){
-            return $response->json();
-        }
-        else
-            return [];
+        return $this->getArray("/orders/fittings/$id");
     }
 
     public function getBoatColors(string $id):array
     {
-        $response = $this->get("/orders/colors/$id");
-        if($response->ok()){
-            return $response->json();
-        }
-        else
-            return [];
+        return $this->getArray("/orders/colors/$id");
     }
 
     public function storeOwner(User $user):void{
@@ -110,24 +85,8 @@ class NeloApiClient extends ApiClient
         }
     }
 
-    public function getBoatChooserFrom():string{
-        $response = $this->get('/web/boatchooser');
-        if($response->ok()){
-            return $response->body();
-        }
-        else{
-            return '';
-        }
-    }
-
     public function getBoatChooserQuestions($quizId):array{
-        $response = $this->get("/boatchooser/quiz/$quizId");
-        if($response->ok()){
-            return $response->json();
-        }
-        else{
-            return [];
-        }
+        return $this->getArray("/boatchooser/quiz/$quizId");
     }
 
     public function chooseBoat(array $answers):array{

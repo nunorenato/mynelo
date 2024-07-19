@@ -30,7 +30,7 @@ class ContentResource extends Resource
                 Forms\Components\TextInput::make('path')
                     ->required(),
                 Forms\Components\RichEditor::make('content')
-                ->columnSpan(2),
+                    ->columnSpan(2),
 
             ]);
     }

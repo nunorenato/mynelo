@@ -84,7 +84,7 @@ class Boat extends Model implements HasMedia
                     'external_id' => $boat->id,
                     'model' => $boat->model,
                     'ideal_weight' => $boat->ideal_weight,
-                    'finished_weight' => $boat->final_weight,
+                    'finished_weight' => $boat->final_weight??null,
                     'finished_at' => $boat->finish_date,
                     'synced' => false,
                 ]);
