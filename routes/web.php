@@ -64,6 +64,8 @@ Route::get('/register/cancel/{boatregistration}/{hash}', [\App\Http\Controllers\
  */
 Volt::route('boatid/{boat_id}', 'boats.show_public');
 
+
+
 /**
  * Error pages
  */

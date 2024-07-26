@@ -17,3 +17,13 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+/**
+ * Nelo Coach
+ */
+Route::prefix('coach')->group(function(){
+
+    Route::apiResource('session', \App\Http\Controllers\CoachSessionController::class);
+    Route::post('session/upload', [\App\Http\Controllers\CoachSessionController::class, 'upload']);
+});
+

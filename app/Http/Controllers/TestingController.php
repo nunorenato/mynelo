@@ -12,6 +12,7 @@ use App\Mail\RegistrationResultMail;
 use App\Models\Attribute;
 use App\Models\Boat;
 use App\Models\BoatRegistration;
+use App\Models\Coach\Session;
 use App\Models\Product;
 use App\Models\ProductType;
 use App\Models\User;
@@ -38,13 +39,15 @@ class TestingController extends Controller
     public function index()
     {
 
-        $youtube = new YoutubeApiClient();
+        $time = Carbon::createFromTimestampMs(1721912085245);
 
-        Benchmark::dd(fn() => $youtube->getPlaylistItems('PL97bnGYVvtIElcYvqUwSvReh9qqo8uASH'), 1);
+        dump($time->toDateTimeString());
+        dump($time->milli);
 
-        //$x = $youtube->getPlaylistItems('PL97bnGYVvtIElcYvqUwSvReh9qqo8uASH');
+        $time->addHours('01');
 
-        //dump($x);
+        dump($time->toDateTimeString());
+
 
         dump('ok');
 
