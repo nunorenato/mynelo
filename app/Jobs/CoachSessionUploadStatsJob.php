@@ -31,7 +31,8 @@ class CoachSessionUploadStatsJob implements ShouldQueue
                                 MAX( spm ) AS max_spm,
                                 AVG( spm ) AS avg_spm,
                                 AVG( heart) as avg_heart,
-                                MAX( heart) as max_heart')
+                                MAX( heart) as max_heart,
+                                1 as gpslat')
             ->first();
 
         $this->session->update($stats->toArray());
