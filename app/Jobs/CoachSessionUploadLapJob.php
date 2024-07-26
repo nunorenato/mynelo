@@ -52,6 +52,8 @@ class CoachSessionUploadLapJob implements ShouldQueue
 
             $lap->update($stats->toArray());
 
+            \Storage::disk('local')->delete('coach-tmp/'.basename($this->filename));
+
         }
 
     }

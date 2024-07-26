@@ -79,6 +79,8 @@ class CoachSessionController extends Controller
 
             $fullPath = Storage::disk('local')->path($file->storeAs('coach-tmp', $filename));
             $unzipedFile = self::unzip($fullPath);
+            //Storage::disk('local')->delete("coach-tmp/$filename"); // keep and delete after one week
+
             $a = Str::of(Str::of($unzipedFile)->explode('.')->first())->explode('_');
 
             if($sessions->doesntContain('id', $a->first())){
@@ -95,11 +97,11 @@ class CoachSessionController extends Controller
 
             if(Str::contains($unzipedFile, 'l.txt', true)){
                 Log::debug("Adding job for lap file: $unzipedFile");
-                $jobsLaps[] = new CoachSessionUploadLapJob($session, Storage::disk('local')->path('coach-tmp\\'.$unzipedFile));
+                $jobsLaps[] = new CoachSessionUploadLapJob($session, Storage::disk('local')->path('coach-tmp/'.$unzipedFile));
             }
             else{
                 Log::debug("Adding job for file: $unzipedFile");
-                $jobs[] = new CoachSessionUploadJob($session, Storage::disk('local')->path('coach-tmp\\'.$unzipedFile));
+                $jobs[] = new CoachSessionUploadJob($session, Storage::disk('local')->path('coach-tmp/'.$unzipedFile));
             }
 
           //  dump($filename);

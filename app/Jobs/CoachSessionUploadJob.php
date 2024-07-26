@@ -27,5 +27,7 @@ class CoachSessionUploadJob implements ShouldQueue
         Log::debug("Job processing file {$this->filename}");
 
         Excel::import(new SessionImport($this->session), $this->filename);
+
+        \Storage::disk('local')->delete('coach-tmp/'.basename($this->filename));
     }
 }
