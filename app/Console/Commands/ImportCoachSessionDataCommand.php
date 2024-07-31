@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ImportCoachSessionDataCommand extends Command
 {
-    protected $signature = 'import:coach-session-data {filename}';
+    protected $signature = 'coach:import-session-data {filename}';
 
     protected $description = 'Import CSV data for Nelo Coach session data';
 

@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Storage;
 
 class ImportCoachSessionLapsCommand extends Command
 {
-    protected $signature = 'import:coach-session-laps {filename}';
+    protected $signature = 'coach:import-laps {filename}';
 
-    protected $description = 'Command description';
+    protected $description = 'Import laps';
 
     public function handle(): void
     {

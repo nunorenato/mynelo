@@ -20,21 +20,6 @@ class CoachSessionUploadStatsJob implements ShouldQueue
 
     public function handle(): void
     {
-        Log::info("Calculating stats for session {$this->session->id}");
-
-        $stats = $this->session->sessionData()
-            ->selectRaw('SUM( speed ) AS distance,
-                                AVG( speed ) AS avg_speed,
-                                MAX( speed ) AS max_speed,
-                                UNIX_TIMESTAMP(MIN(tagtime)) AS start_time,
-                                UNIX_TIMESTAMP(MAX(tagtime)) AS end_time,
-                                MAX( spm ) AS max_spm,
-                                AVG( spm ) AS avg_spm,
-                                AVG( heart) as avg_heart,
-                                MAX( heart) as max_heart,
-                                1 as gpslat')
-            ->first();
-
-        $this->session->update($stats->toArray());
+        $this->session->updateStats();
     }
 }
