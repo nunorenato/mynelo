@@ -4,6 +4,8 @@ namespace App\Models\Coach;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class SessionLap extends Model
 {
@@ -36,4 +38,5 @@ class SessionLap extends Model
     public function session():BelongsTo{
         return $this->belongsTo(Session::class, 'trainid');
     }
+
 }

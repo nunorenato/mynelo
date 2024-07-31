@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ZipHelper;
 use App\Http\Resources\CoachSessionResource;
 use App\Jobs\CoachSessionUploadJob;
 use App\Jobs\CoachSessionUploadLapJob;
@@ -78,7 +79,7 @@ class CoachSessionController extends Controller
             Log::debug("Received file: $filename");
 
             $fullPath = Storage::disk('local')->path($file->storeAs('coach-tmp', $filename));
-            $unzipedFile = self::unzip($fullPath);
+            $unzipedFile = ZipHelper::unzip($fullPath);
             //Storage::disk('local')->delete("coach-tmp/$filename"); // keep and delete after one week
 
             $a = Str::of(Str::of($unzipedFile)->explode('.')->first())->explode('_');
@@ -96,19 +97,20 @@ class CoachSessionController extends Controller
 
 
             if(Str::contains($unzipedFile, 'l.txt', true)){
-                Log::debug("Adding job for lap file: $unzipedFile");
+                Log::info("Adding job for lap file: $unzipedFile");
                 $jobsLaps[] = new CoachSessionUploadLapJob($session, Storage::disk('local')->path('coach-tmp/'.$unzipedFile));
             }
             else{
-                Log::debug("Adding job for file: $unzipedFile");
+                Log::info("Adding job for file: $unzipedFile");
                 $jobs[] = new CoachSessionUploadJob($session, Storage::disk('local')->path('coach-tmp/'.$unzipedFile));
             }
 
           //  dump($filename);
 
         }
-        $allJobs = collect($jobs, $jobsLaps)->concat($jobsLaps);
+        $allJobs = collect($jobs)->concat($jobsLaps);
         $sessions->each(function (Session $item, $key) use ($allJobs){
+            Log::info('Adding job for session: '.$item->id);
             $allJobs->add(new CoachSessionUploadStatsJob($item));
         });
         Bus::chain($allJobs)->dispatch();
@@ -128,26 +130,5 @@ class CoachSessionController extends Controller
         return 'show';
     }
 
-    private static function unzip(string $filename){
-        // Raising this value may increase performance
-        $buffer_size = 1048576; // read 4kb at a time
-        $out_file_name = str_replace('.gz', '', $filename);
 
-        // Open our files (in binary mode)
-        $file = gzopen($filename, 'rb');
-        $out_file = fopen($out_file_name, 'wb');
-
-        // Keep repeating until the end of the input file
-        while (!gzeof($file)) {
-            // Read buffer-size bytes
-            // Both fwrite and gzread and binary-safe
-            fwrite($out_file, gzread($file, $buffer_size));
-        }
-
-        // Files are done, close files
-        fclose($out_file);
-        gzclose($file);
-
-        return basename($out_file_name);
-    }
 }

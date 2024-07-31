@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Imports\SessionImport;
 use App\Models\Coach\Session;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -10,9 +9,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Maatwebsite\Excel\Facades\Excel;
-use function Laravel\Prompts\error;
 
 class CoachSessionUploadJob implements ShouldQueue
 {
@@ -24,10 +20,8 @@ class CoachSessionUploadJob implements ShouldQueue
 
     public function handle(): void
     {
-        Log::debug("Job processing file {$this->filename}");
+        Log::info("Job processing file {$this->filename}");
 
-        Excel::import(new SessionImport($this->session), $this->filename);
-
-        \Storage::disk('local')->delete('coach-tmp/'.basename($this->filename));
+        $this->session->importData($this->filename);
     }
 }

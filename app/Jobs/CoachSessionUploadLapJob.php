@@ -25,36 +25,7 @@ class CoachSessionUploadLapJob implements ShouldQueue
     {
         Log::info("Job processing lap file {$this->filename}");
 
-        $csv = file_get_contents($this->filename); //Storage::get($this->filename);
-        $lines = explode("\n", $csv);
-
-        foreach ($lines as $line) {
-
-            $points = explode(';', $line);
-            if(count($points) != 2)
-                continue;
-
-            $start = Carbon::createFromTimestampMs($points[0]);
-            $end = Carbon::createFromTimestampMs($points[1]);
-
-            $lap = SessionLap::firstOrCreate([
-                'trainid' => $this->session->id,
-                'tagtime' => $start->toDateTimeString(),
-                'endtime' => $end->toDateTimeString(),
-                'decima_segundo1' => $start->milli,
-                'decima_segundo2' => $end->milli,
-            ]);
-
-            $stats = $this->session->sessionData()
-                ->whereBetween('tagtime', [$start, $end])
-                ->selectRaw('AVG(speed) as stat_avgSpeed, MAX(speed) as stat_maxSpeed, MAX(spm) as stat_maxSPM, SUM(speed) as stat_distance, AVG(spm) as stat_avgSPM, 1 as calculado')
-                ->first();
-
-            $lap->update($stats->toArray());
-
-            \Storage::disk('local')->delete('coach-tmp/'.basename($this->filename));
-
-        }
+        $this->session->importLaps($this->filename);
 
     }
 }
