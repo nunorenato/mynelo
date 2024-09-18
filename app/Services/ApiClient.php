@@ -168,4 +168,20 @@ abstract class ApiClient
 
         return Http::patch($fullURL, $payload);
     }
+
+    protected function delete($endpoint):Response{
+        Log::debug("API Client deleting: $endpoint");
+
+        $fullURL = $this->baseURL.$endpoint;
+
+        if($this->authType == AuthTypeEnum::None){
+            return Http::delete($fullURL);
+        }
+
+        if($this->authType == AuthTypeEnum::BearerToken){
+            return Http::withToken($this->bearerToken)->delete($fullURL);
+        }
+
+        return Http::delete($fullURL);
+    }
 }

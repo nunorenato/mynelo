@@ -40,17 +40,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('dashboard', 'dashboard')->name('dashboard');
 //    Volt::route('boats', 'boats.index')->name('boats'); TROCAR SE FOR PRECISO DINAMISMO NA PAGINA
 
-    Route::view('boats', 'livewire.boats.index')->name('boats');
-    Volt::route('boats/order/', 'boats.order')->name('boats.order');
-    Volt::route('boats/{boatRegistration}', 'boats.show')->name('boats.show');
+    Route::prefix('boats')->group(function(){
+        Route::view('', 'livewire.boats.index')->name('boats');
+        Volt::route('/order', 'boats.order')->name('boats.order');
+        Volt::route('/{boatRegistration}', 'boats.show')->name('boats.show');
+    });
 
-    Volt::route('paddle-lab', 'paddlelab.index')->name('paddle-lab');
-    Volt::route('paddle-lab/order/{order}', 'paddlelab.show')->name('paddle-lab.order');
+    Route::prefix('paddle-lab')->group(function(){
+        Volt::route('', 'paddlelab.index')->name('paddle-lab');
+        Volt::route('order/{order}', 'paddlelab.show')->name('paddle-lab.order');
+    });
+
+    Route::prefix('membership')->group(function (){
+       Volt::route('', 'membership.index')->name('membership');
+    });
 
     Route::view('coach', 'livewire.coach.index')->name('coach');
 
     Route::get('testing', [\App\Http\Controllers\TestingController::class, 'index']);
-    Route::get('retry_sync/{boatRegistration}', [\App\Http\Controllers\BoatRegistrationController::class, 'retrySync']);
 });
 
 /**

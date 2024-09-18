@@ -4,9 +4,15 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\GenderEnum;
+use App\Enums\MembershipEnum;
 use App\Models\Magento\CustomerEntity;
+use App\Models\Magento\PaddleLabSalesOrder;
+use App\Notifications\MembershipNotification;
+use App\Services\MagentoApiClient;
+use App\Services\NeloApiClient;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -51,6 +59,7 @@ class User extends Authenticatable implements FilamentUser
         'extras',
         'extras->coupon',
         'extras->coupon_used',
+        'extras->paddle_lab_discount',
         'external_id',
     ];
 
@@ -77,6 +86,7 @@ class User extends Authenticatable implements FilamentUser
         'alert_fill' => 'boolean',
         'extras' => 'json',
         'extras->coupon_used' => 'boolean',
+        'membership_id' => MembershipEnum::class,
     ];
 
     public function country():BelongsTo{
@@ -114,5 +124,62 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasOne(CustomerEntity::class, 'email', 'email');
             // \App\Models\Magento\CustomerEntity::firstWhere('email', $this->email);
+    }
+
+    public function membership():BelongsTo{
+        return $this->belongsTo(Membership::class);
+    }
+
+    public function allRegisteredBoats():HasMany{
+        return $this->hasMany(BoatRegistration::class)
+            ->whereIn('status', [\App\Enums\StatusEnum::VALIDATED, \App\Enums\StatusEnum::COMPLETE])
+            ->withTrashed();
+    }
+
+    public function paddleLabOrders():Collection
+    {
+        return PaddleLabSalesOrder::allOrders($this);
+    }
+
+    /**
+     * Determines the current membership for the user and if it has changed, creates the discounts and notifies him/her
+     *
+     * @return void
+     */
+    public function evaluateMembership():void{
+
+        Log::info("Evaluating membership status for user {$this->name}. Current membership is {$this->membership?->name}");
+
+        $old = $this->membership_id;
+
+        $this->membership()->associate(Membership::evaluate($this));
+        $this->save();
+
+        if($old != $this->membership_id){
+            Log::info("Membership updated. New membership is {$this->membership->name}");
+            $magento = new MagentoApiClient();
+            if($this->membership_id->discountRule() != null){
+                $voucher = $magento->generateCoupon($this->membership_id->discountRule());
+                $this->update(['extras->paddle_lab_discount' => $voucher]);
+            }
+            elseif(!empty($this->extras['paddle_lab_discount'])){ // remove coupon
+                $coupon = $magento->searchCouponByCode($this->extras['paddle_lab_discount']);
+                if(!empty($coupon)){
+                    $magento->deleteCoupon($coupon->coupon_id);
+                }
+                $this->update(['extras->paddle_lab_discount' => null]);
+            }
+
+            $nelo = new NeloApiClient();
+            $nelo->setDiscount($this, $this->membership_id->boatDiscount());
+
+            if(!empty($this->membership)){
+                $this->notify(new MembershipNotification($this->membership));
+            }
+
+            // afetar desconto barcos
+
+        }
+
     }
 }

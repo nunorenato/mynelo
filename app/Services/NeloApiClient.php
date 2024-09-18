@@ -100,4 +100,16 @@ class NeloApiClient extends ApiClient
         }
     }
 
+    public function setDiscount(User $user, float $discount){
+        $response = $this->patch("/entidade/{$user->external_id}",[
+            'discount' => $discount
+        ]);
+        if(!$response->ok()){
+            Log::error('Error updating discount', [
+                'e_id' => $user->external_id,
+                'discount' => $discount,
+            ]);
+        }
+    }
+
 }

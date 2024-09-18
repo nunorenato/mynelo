@@ -58,6 +58,10 @@ export default {
         },
         {
             pattern: /text-sky-*/,
+        },
+        {
+            pattern: /(orange|slate|yellow|stone)-(300|400|500|600|700)/,
+            variants: ['ring', 'text']
         }
     ]
 };

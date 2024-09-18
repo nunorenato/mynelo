@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\FieldEnum;
+use App\Enums\MembershipEnum;
 use App\Enums\ProductTypeEnum;
 use App\Enums\StatusEnum;
 use App\Jobs\BoatSyncJob;
@@ -13,6 +14,7 @@ use App\Models\Attribute;
 use App\Models\Boat;
 use App\Models\BoatRegistration;
 use App\Models\Coach\Session;
+use App\Models\Membership;
 use App\Models\Product;
 use App\Models\ProductType;
 use App\Models\User;
@@ -39,14 +41,16 @@ class TestingController extends Controller
     public function index()
     {
 
-        $time = Carbon::createFromTimestampMs(1721912085245);
+        $user = User::find(1);
+  //      foreach (User::all() as $user) {
+           // $user->evaluateMembership();
 
-        dump($time->toDateTimeString());
-        dump($time->milli);
+        dump(Membership::evaluate($user));
 
-        $time->addHours('01');
 
-        dump($time->toDateTimeString());
+
+//        }
+
 
 
         dump('ok');

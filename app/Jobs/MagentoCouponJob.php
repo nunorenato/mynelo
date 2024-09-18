@@ -22,7 +22,7 @@ class MagentoCouponJob implements ShouldQueue
     public function handle(): void
     {
         $magento = new MagentoApiClient();
-        $coupon = $magento->generateCoupon();
+        $coupon = $magento->generateCoupon(config('nelo.magento.coupon_rule'));
 
         if(empty($coupon)){
             if($this->attempts() < 4){

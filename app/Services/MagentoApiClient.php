@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\AuthTypeEnum;
+use Illuminate\Support\Facades\Log;
 
 class MagentoApiClient extends ApiClient
 {
@@ -12,7 +13,9 @@ class MagentoApiClient extends ApiClient
         $this->setAuth(AuthTypeEnum::BearerToken, config('nelo.magento.api.token'));
     }
 
-    public function generateCoupon():string|null{
+    public function generateCoupon(int $rule):string|null{
+
+        Log::info("Generating Magento coupon for rule $rule");
 
         $response = $this->post('/coupons/generate', [
             'couponSpec' => [
@@ -47,6 +50,14 @@ class MagentoApiClient extends ApiClient
         }
         else
             return null;
+    }
+
+    public function deleteCoupon(int $couponId):void{
+        $response = $this->delete("/coupons/$couponId");
+
+        if(!$response->ok()){
+            Log::error('Error deleting coupon');
+        }
     }
 
     public function getProduct(string $sku):object|null{

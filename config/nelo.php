@@ -20,6 +20,12 @@ return [
             'token' => env('MAGENTO_API_TOKEN'),
         ],
         'coupon_rule' => env('MAGENTO_COUPON_RULE'),
+        'discount_rules' => [
+            '5pct' => 2657,
+            '10pct' => 2631,
+            '15pct' => 2629,
+            '20pct' => 2649,
+        ]
     ],
 
     'layups' => ['E', 'F', 'G', 'SCS', 'WWR', 'FC', 'P1'],

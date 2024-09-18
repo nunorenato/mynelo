@@ -9,6 +9,8 @@ use App\Models\Discipline;
 use App\Models\Attribute;
 use App\Models\Content;
 use App\Services\YoutubeApiClient;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Volt\Component;
 use Illuminate\Database\Eloquent\Collection;
 use Mary\Traits\Toast;
@@ -30,6 +32,7 @@ new class extends Component {
     public bool $showPlaylist = false;
     public bool $showYoutube = false;
 
+    #[Locked]
     public Boat $boat;
     public Product $model;
     public Discipline $discipline;
@@ -59,7 +62,7 @@ new class extends Component {
     public array $repairImages;
     public \Illuminate\Support\Collection $repairLibrary;
 
-    public array $rules = [
+    private array $rules = [
         'seat_id' => ['numeric', 'sometimes', 'nullable'],
         'seat_position' => ['numeric', 'sometimes', 'nullable'],
         'seat_height' => ['numeric', 'sometimes', 'nullable'],
@@ -69,6 +72,8 @@ new class extends Component {
         'paddle' => ['string', 'sometimes', 'nullable'],
         'paddle_length' => ['string', 'sometimes', 'nullable'],
     ];
+
+    private Collection $productAttributes;
 
     public function mount(): void
     {
@@ -106,8 +111,14 @@ new class extends Component {
         $this->layup = Content::where('path', "layups/$layupKey")->first();
 
         $this->repairLibrary = new \Illuminate\Support\Collection();
+
+        $this->productAttributes = Attribute::all();
     }
 
+    /**
+     * Saves the boat setup
+     * @return void
+     */
     public function saveSetup(): void
     {
 
@@ -130,11 +141,19 @@ new class extends Component {
         $this->notComplete = false;
     }
 
+    /**
+     * Saves the user entered voucher
+     * @return void
+     */
     public function saveVoucher(): void
     {
         $this->boatRegistration->voucher = $this->voucher;
     }
 
+    /**
+     * Sends the boat info for the repair request
+     * @return void
+     */
     public function sendRepair()
     {
         $validated = $this->validate([
@@ -162,6 +181,10 @@ new class extends Component {
         $this->showRepair = false;
     }
 
+    /**
+     * unregisters the boat for the user
+     * @return void
+     */
     public function removeBoat(): void
     {
 
@@ -180,15 +203,71 @@ new class extends Component {
         );
     }
 
+    /**
+     * Boat details like model and weight
+     */
+    #[Computed]
+    public function details()
+    {
+        $details = [
+            ['name' => $this->boat->external_id, 'sub-value' => 'Boat ID', 'icon' => 'o-finger-print'],
+            ['name' => $this->boat->model, 'sub-value' => 'Boat model', 'icon' => 'o-cube-transparent'],
+        ];
+
+        if (!empty($this->boat->finished_at))
+            $details[] = ['name' => substr($this->boat->finished_at, 0, 10), 'sub-value' => 'Finished date', 'icon' => 'o-calendar'];
+        if (is_numeric($this->boat->finished_weight))
+            $details[] = ['name' => $this->boat->finished_weight, 'sub-value' => 'Final weight (kg)', 'icon' => 'o-scale', 'class' => $this->notComplete ? 'blur-sm' : null];
+        if (is_numeric($this->boat->co2))
+            $details[] = ['name' => $this->boat->co2, 'sub-value' => 'Carbon footprint (kg co2 eq.)', 'icon' => 'carbon.carbon-accounting', 'class' => $this->notComplete ? 'blur-sm' : null];
+        $marketValue = $this->boat->marketValue();
+        if (is_numeric($marketValue))
+            $details[] = ['name' => '€' . $marketValue, 'sub-value' => 'Market value', 'icon' => 'o-banknotes', 'class' => $this->notComplete ? 'blur-sm' : null];
+
+        return $details;
+    }
+
+    /**
+     * Gets the boat's collection
+     * Made as a computed property so Livewire can cache
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    #[Computed]
+    public function components(){
+        return $this->boatRegistration->boat->products()
+            ->where('product_type_id', '<>', ProductTypeEnum::Color->value)
+            ->whereRelation('type', 'fitting', false)
+            ->get()
+            ->transform(function (Product $item, $key) {
+                if (is_numeric($item->pivot->attribute_id)) {
+                    $item->attribute = $this->productAttributes->find($item->pivot->attribute_id);
+                }
+                return $item;
+            })->groupBy('type.name');
+    }
+
     public function with(): array
     {
 
-        $products = $this->boatRegistration->boat->products()
+        $fittings = $this->boatRegistration->boat->products()
+            ->where('product_type_id', '<>', ProductTypeEnum::Color->value)->whereRelation('type', 'fitting', true)
             ->get()
             ->transform(function (Product $item, $key) {
                 //dump($item->pivot);
                 if (is_numeric($item->pivot->attribute_id)) {
-                    $item->attribute = Attribute::find($item->pivot->attribute_id);
+                    $item->attribute = $this->productAttributes->find($item->pivot->attribute_id);
+                }
+                return $item;
+            });
+
+        $colors = $this->boatRegistration->boat->products()
+            ->where('product_type_id', '=', ProductTypeEnum::Color->value)
+            ->get()
+            ->transform(function (Product $item, $key) {
+                //dump($item->pivot);
+                if (is_numeric($item->pivot->attribute_id)) {
+                    $item->attribute = $this->productAttributes->find($item->pivot->attribute_id);
                 }
                 return $item;
             });
@@ -211,30 +290,13 @@ new class extends Component {
             $boatMedia[] = $media->getUrl();
         }
 
-        $details = [
-            ['name' => $this->boat->external_id, 'sub-value' => 'Boat ID', 'icon' => 'o-finger-print'],
-            ['name' => $this->boat->model, 'sub-value' => 'Boat model', 'icon' => 'o-cube-transparent'],
-        ];
 
-        if (!empty($this->boat->finished_at))
-            $details[] = ['name' => substr($this->boat->finished_at, 0, 10), 'sub-value' => 'Finished date', 'icon' => 'o-calendar'];
-        if (is_numeric($this->boat->finished_weight))
-            $details[] = ['name' => $this->boat->finished_weight, 'sub-value' => 'Final weight (kg)', 'icon' => 'o-scale', 'class' => $this->notComplete ? 'blur-sm' : null];
-        if (is_numeric($this->boat->co2))
-            $details[] = ['name' => $this->boat->co2, 'sub-value' => 'Carbon footprint (kg co2 eq.)', 'icon' => 'carbon.carbon-accounting', 'class' => $this->notComplete ? 'blur-sm' : null];
-        $marketValue = $this->boat->marketValue();
-        if (is_numeric($marketValue))
-            $details[] = ['name' => '€' . $marketValue, 'sub-value' => 'Market value', 'icon' => 'o-banknotes', 'class' => $this->notComplete ? 'blur-sm' : null];
-
-        $components = $products->where('product_type_id', '<>', ProductTypeEnum::Color->value)->where('type.fitting', false);
-        //dump($components->groupBy('type.name'));
-        $components = $components->groupBy('type.name');
 
         return [
-            'details' => $details,
-            'fittings' => $products->where('product_type_id', '<>', ProductTypeEnum::Color->value)->where('type.fitting', true),
-            'components' => $components,
-            'colors' => $products->where('product_type_id', '=', ProductTypeEnum::Color->value),
+           // 'details' => $details,
+            'fittings' => $fittings,
+            //'components' => $components,
+            'colors' => $colors,
             'setupFields' => empty($this->discipline) ? [] : $this->discipline->fields,
             'aboutModel' => Content::where('path', 'model/about/' . strtolower(implode('_', $parts)))->first(),
             'boatMedia' => $boatMedia,
@@ -267,7 +329,7 @@ new class extends Component {
     public function loadYoutubePlaylist()
     {
 
-        if(empty($this->model->discipline->playlist))
+        if (empty($this->model->discipline->playlist))
             return;
 
         $youtube = new YoutubeApiClient();
@@ -288,7 +350,8 @@ new class extends Component {
 
     }
 
-    public function loadYoutube(string $videoId){
+    public function loadYoutube(string $videoId)
+    {
 
         $this->youtubeVideo = "https://www.youtube.com/embed/$videoId";
 
@@ -339,7 +402,7 @@ new class extends Component {
     <div class="grid lg:grid-cols-3 gap-5">
         <!-- BOAT DETAILS -->
         <x-mary-card title="Boat details">
-            @foreach($details as $detail)
+            @foreach($this->details as $detail)
                 <x-mary-list-item :item="$detail" sub-value="sub-value" class="{{ $detail['class']??'' }}">
                     <x-slot:avatar>
                         <x-mary-icon :name="$detail['icon']" class="h-10"/>
@@ -699,7 +762,7 @@ new class extends Component {
     <!-- COMPONENTS -->
     <x-mary-drawer wire:model="showComponents" title="Components" subtitle="Need to replace a component no your boat?"
                    right class="w-11/12 lg:w-1/2">
-        @foreach($components as $type=>$comps)
+        @foreach($this->components as $type=>$comps)
             <h3>{{ Str::plural($type) }}</h3>
             @foreach($comps as $option)
 
@@ -731,7 +794,8 @@ new class extends Component {
                     <img src="{{ $item['avatar'] }}" class="w-24 rounded-xl /" alt="{{$item['name']}}">
                 </x-slot:avatar>
                 <x-slot:actions>
-                    <x-mary-button label="Watch" wire:click="loadYoutube('{{ $item['videoId'] }}')" class="btn-info" spinner></x-mary-button>
+                    <x-mary-button label="Watch" wire:click="loadYoutube('{{ $item['videoId'] }}')" class="btn-info"
+                                   spinner></x-mary-button>
                 </x-slot:actions>
             </x-mary-list-item>
         @endforeach

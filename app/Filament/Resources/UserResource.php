@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\MembershipEnum;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
+use App\Models\Membership;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -120,7 +122,13 @@ class UserResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('gender'),*/
                 Tables\Columns\IconColumn::make('competition')
-                    ->boolean(),
+                    ->boolean()
+                    ->alignCenter(),
+               Tables\Columns\IconColumn::make('membership_id')
+                    ->label('Membership')
+                    ->icon('tabler-award-filled')
+                    ->color(fn (MembershipEnum $state): string => $state->color())
+                    ->alignCenter(),
                /* Tables\Columns\TextColumn::make('weekly_trainings')
                     ->numeric()
                     ->sortable(),*/

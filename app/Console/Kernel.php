@@ -56,7 +56,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function (){
             $users = User::whereJsonContains('extras->coupon_used', false)->get();
-            dump(count($users));
+            //dump(count($users));
             $magento = new MagentoApiClient();
             foreach ($users as $user){
                 $coupon = $magento->searchCouponByCode($user->extras['coupon']);
