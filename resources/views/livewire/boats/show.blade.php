@@ -57,12 +57,7 @@ new class extends Component {
     public array $playlist;
     public string $youtubeVideo;
 
-    public string $repairDescription;
-    #[Rule(['$repairImages.*' => 'image'])]
-    public array $repairImages;
-    public \Illuminate\Support\Collection $repairLibrary;
-
-    private array $rules = [
+    private array $setupRules = [
         'seat_id' => ['numeric', 'sometimes', 'nullable'],
         'seat_position' => ['numeric', 'sometimes', 'nullable'],
         'seat_height' => ['numeric', 'sometimes', 'nullable'],
@@ -73,7 +68,11 @@ new class extends Component {
         'paddle_length' => ['string', 'sometimes', 'nullable'],
     ];
 
-    private Collection $productAttributes;
+    public string $repairDescription;
+
+//    #[\Livewire\Attributes\Rule(['$repairImages.*' => 'image|sometimes'])]
+    public array $repairImages;
+    public \Illuminate\Support\Collection $repairLibrary;
 
     public function mount(): void
     {
@@ -98,10 +97,10 @@ new class extends Component {
         if (!empty($this->discipline)) {
             foreach ($this->discipline->fields as $field) {
                 if ($field->required) {
-                    $this->rules[$field->column] = array_filter($this->rules[$field->column], function ($element) {
+                    $this->setupRules[$field->column] = array_filter($this->setupRules[$field->column], function ($element) {
                         return $element != 'nullable';
                     });
-                    $this->rules[$field->column][] = 'required';
+                    $this->setupRules[$field->column][] = 'required';
                 }
             }
         }
@@ -112,7 +111,27 @@ new class extends Component {
 
         $this->repairLibrary = new \Illuminate\Support\Collection();
 
-        $this->productAttributes = Attribute::all();
+    }
+
+    public function rules(){
+        if($this->showSetup){
+            return $this->setupRules;
+        }
+        elseif($this->showRepair){
+            return [
+                'repairDescription' => ['required'],
+                'repairImages.*' => ['image'],
+            ];
+        }
+        else{
+            return [];
+        }
+    }
+
+    #[Computed]
+    public function productAttributes():Collection
+    {
+        return Attribute::all();
     }
 
     /**
@@ -156,10 +175,7 @@ new class extends Component {
      */
     public function sendRepair()
     {
-        $validated = $this->validate([
-            'repairDescription' => ['required'],
-            'repairImages.*' => ['image'],
-        ]);
+        $validated = $this->validate();
 
         $attachs = [];
         foreach ($validated['repairImages'] as $image) {
@@ -235,6 +251,7 @@ new class extends Component {
      */
     #[Computed]
     public function components(){
+
         return $this->boatRegistration->boat->products()
             ->where('product_type_id', '<>', ProductTypeEnum::Color->value)
             ->whereRelation('type', 'fitting', false)
