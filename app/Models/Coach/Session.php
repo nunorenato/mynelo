@@ -3,6 +3,7 @@
 namespace App\Models\Coach;
 
 use App\Imports\SessionImport;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -45,6 +46,13 @@ class Session extends Model
         'max_heart'
     ];
 
+    protected function duration():Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => ($attributes['end_time']-$attributes['start_time']),
+        );
+    }
+
     public function sessionData():HasMany{
         return $this->hasMany(SessionData::class, 'trainid');
     }
@@ -57,8 +65,6 @@ class Session extends Model
     public function importData(string $filename){
 
         Log::info("Session import from file {$filename}");
-
-        $this->sessionData()->delete();
 
         Excel::import(new SessionImport($this), $filename);
 

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ImportCoachSessionDataCommand extends Command
 {
-    protected $signature = 'coach:import-session-data {filename}';
+    protected $signature = 'coach:import-session-data {filename} {--clear}';
 
     protected $description = 'Import CSV data for Nelo Coach session data';
 
@@ -19,6 +19,10 @@ class ImportCoachSessionDataCommand extends Command
 
         $splits = explode('_', $this->argument('filename'));
         $session = Session::find($splits[0]);
+
+        if($this->option('clear')) {
+            $session->sessionData()->delete();
+        }
 
         $session->importData(
             Storage::disk('local')->path('coach-tmp/'.
