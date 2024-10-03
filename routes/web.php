@@ -55,7 +55,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
        Volt::route('', 'membership.index')->name('membership');
     });
 
-    Route::view('coach', 'livewire.coach.index')->name('coach');
+    Route::prefix('coach')->group(function (){
+        Volt::route('', 'coach.index')->name('coach');
+        Volt::route('{session}', 'coach.show')->name('coach.show');
+    });
 
     Route::get('testing', [\App\Http\Controllers\TestingController::class, 'index']);
 });
@@ -69,7 +72,8 @@ Route::get('/register/cancel/{boatregistration}/{hash}', [\App\Http\Controllers\
 /**
  * QR Code
  */
-Volt::route('boatid/{boat_id}', 'boats.show_public');
+Route::get('boatid/{boat_id}', \App\Livewire\Boats\ShowPublic::class)->name('boats.public');
+Route::get('pool/{boat_id}', \App\Livewire\Boats\ShowPublic::class)->name('boats.pool');
 
 
 

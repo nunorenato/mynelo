@@ -48,6 +48,8 @@ class BoatSyncJob implements ShouldQueue
             'finished_at' => $this->extendedJson->finish_date??null,
             'finished_weight' => $this->extendedJson->final_weight??null,
             'voucher_used' => $this->extendedJson->voucher_used,
+            'remarks' => $this->extendedJson->remarks,
+            'reference' => $this->extendedJson->reference,
         ]);
 
         /**
@@ -97,7 +99,7 @@ class BoatSyncJob implements ShouldQueue
             foreach ($images as $image){
                 if($currentImages->doesntContain('file_name', basename($image['url']))){
                     try{
-                        $this->boat->addMediaFromUrl($image['url'])->toMediaCollection('boats');
+                        $this->boat->addMediaFromUrl($image['url'])->toMediaCollection($image['type']==14?'pool':'boats');
                     }
                     catch(FileCannotBeAdded $fcbae){
                         Log::error("File could not be added {$image['url']}", [$fcbae->getMessage()]);
