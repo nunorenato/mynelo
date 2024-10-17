@@ -26,7 +26,7 @@ new class extends Component {
         return[
             'nSessions' => $this->totals->nSessions,
             'duration' => $this->totals->getDuration(),
-            'totalsFormated' => $this->totalsFormated,
+            'totalsFormated' => $this->totalsFormated??null,
         ];
     }
 
@@ -44,7 +44,7 @@ new class extends Component {
             title="Total distance"
             icon="tabler.route-2"
             color="text-amber-800"
-            value="{{ $totalsFormated->getDistanceWithUnits() }}"
+            value="{{ $totalsFormated?->getDistanceWithUnits() }}"
         />
         <x-mary-stat
             title="Total time"
