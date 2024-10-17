@@ -12,6 +12,7 @@
         "filament/spatie-laravel-media-library-plugin": "^3.2",
         "filipfonal/filament-log-manager": "^2.0",
         "guzzlehttp/guzzle": "^7.2",
+        "jordanbrauer/unit-converter": "^0.9.0",
         "kongulov/interact-with-enum": "^1.0",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",

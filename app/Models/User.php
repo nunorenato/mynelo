@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\GenderEnum;
 use App\Enums\MembershipEnum;
+use App\Models\Coach\Session;
 use App\Models\Magento\CustomerEntity;
 use App\Models\Magento\PaddleLabSalesOrder;
 use App\Notifications\MembershipNotification;
@@ -128,6 +129,11 @@ class User extends Authenticatable implements FilamentUser
 
     public function membership():BelongsTo{
         return $this->belongsTo(Membership::class);
+    }
+
+    public function coachSessions():HasMany
+    {
+        return $this->hasMany(Session::class, 'athleteid', 'athlete_id');
     }
 
     public function allRegisteredBoats():HasMany{

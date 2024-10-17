@@ -116,7 +116,7 @@ new class extends Component{
     <div class="grid lg:grid-cols-2 gap-5">
         <x-mary-card title="Configure your boat" subtitle="Create your dream boat and order it">
             <p class="mb-4">The boat of your dreams can be just a few clicks away</p>
-            <x-mary-button label="Configure your boat" icon="o-swatch" class="btn-info" link="https://myorder.nelo.eu" external></x-mary-button>
+            <x-mary-button label="Configure your boat" icon="o-swatch" class="btn-info" link="https://myorder.nelo.eu?customer={{ Auth::user()->external_id }}" external></x-mary-button>
         </x-mary-card>
         <x-mary-card title="Choose your boat" subtitle="Find the best model for you">
             <p class="mb-4">Not sure what model fits you best? From you physical attributes, paddling style and preferences we can help you

@@ -15,6 +15,8 @@ class BoatRegistration extends Model
 {
     use SoftDeletes, Prunable, LogsActivity;
 
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'boat_id',
         'user_id',

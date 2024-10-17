@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Livewire\Coach\SessionSelectionSynth;
+use App\Models\Coach\SessionSelection;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -35,5 +37,7 @@ class AppServiceProvider extends ServiceProvider
             'yellow-500' => Color::hex('#eab308'),
             'stone-300' => Color::hex('#d6d3d1'),
         ]);
+
+        \Livewire::propertySynthesizer(SessionSelectionSynth::class);
     }
 }

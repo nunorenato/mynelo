@@ -24,7 +24,7 @@ new class extends Component {
     <x-mary-header title="Dashboard" separator></x-mary-header>
 
     <div class="grid lg:grid-cols-4 gap-4 lg:gap-5">
-        <x-mary-stat title="Boats registered" :value="$nBoats" icon="tabler.kayak" color="text-red-700"></x-mary-stat>
+        <x-mary-stat title="Boats registered" description="" :value="$nBoats" icon="tabler.kayak" color="text-red-700"></x-mary-stat>
         <x-mary-stat title="Paddle Lab orders" :value="$nOrders" icon="o-shopping-bag"
                      color="text-sky-700"></x-mary-stat>
         @if(Auth::user()->isAdmin())
@@ -38,4 +38,5 @@ new class extends Component {
         <livewire:boats.dashboard></livewire:boats.dashboard>
         <livewire:paddlelab.coupon></livewire:paddlelab.coupon>
     </div>
+    <livewire:coach.stats></livewire:coach.stats>
 </div>

@@ -59,8 +59,13 @@ define('EXT_SENSOR', 19); // vaaka
 
     }
 
-    public function model(array $row):SessionData
+    public function model(array $row):SessionData|null
     {
+
+        // ignore lines without gps coverage
+        if($row[self::ACCU] == -1){
+            return null;
+        }
 
         $seconds = $row[self::TIMESTAMP] / 1000;
         $milliseconds = fmod($row[self::TIMESTAMP], 1000) / 100;

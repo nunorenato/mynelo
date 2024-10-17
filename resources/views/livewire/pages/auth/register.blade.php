@@ -35,6 +35,13 @@ new #[Layout('layouts.guest')] class extends Component {
 
         Auth::login($user);
 
+        $athlete = \App\Models\Coach\Athlete::where('email', 'LIKE', $user->email)
+            ->first();
+        if(!empty($athlete)){
+            $user->athlete_id = $athlete->id;
+            $user->save();
+        }
+
         \App\Jobs\NeloStoreUserJob::dispatch($user);
         MagentoCouponJob::dispatch($user);
 

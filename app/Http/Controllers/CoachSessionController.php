@@ -8,6 +8,7 @@ use App\Jobs\CoachSessionUploadJob;
 use App\Jobs\CoachSessionUploadLapJob;
 use App\Jobs\CoachSessionUploadStatsJob;
 use App\Models\Coach\Session;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
@@ -28,11 +29,29 @@ class CoachSessionController extends Controller
         Log::debug('Create training session', $request->toArray());
 
         $validated = $request->validate([
-            'id_user' => 'required', // todo: exists:
-            'id_boat' => 'required',
+            'id_user' => ['required', 'exists:users,id'],
+            'id_boat' => ['required'],
             'date' => 'required|numeric',
             'timezone' => 'sometimes',
         ]);
+
+        // TODO: change when abolishing athlete_id
+
+        /*if($validated['id_boat'] != 0){
+            $request->validate([
+                'id_boat' => 'exists:boat_registrations,id',
+            ]);
+        }else{
+            $validated['id_boat'] = null;
+        }*/
+
+        $user = User::find($validated['id_user']);
+        if(empty($user->athlete_id)){
+            $max = User::max('athlete_id')??10000;
+            $max = max($max, 10000);
+            $user->athlete_id = $max+1;
+            $user->save();
+        }
 
         if(!empty($validated['timezone'])){
             if(preg_match("/([+\-])?(\d\d):(\d\d)/", $validated['timezone'], $fuso)){
@@ -47,7 +66,7 @@ class CoachSessionController extends Controller
         $time = Carbon::createFromTimestampMs($validated['date']);
 
         $session = Session::firstOrCreate([
-            'athleteid' => $validated['id_user'],
+            'athleteid' => $user->athlete_id,
             'boatid' => $validated['id_boat'],
             'createdon' => $time->toDateTimeString(),
             'gpslng' => $time->milli,

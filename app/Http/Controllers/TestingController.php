@@ -14,6 +14,7 @@ use App\Models\Attribute;
 use App\Models\Boat;
 use App\Models\BoatRegistration;
 use App\Models\Coach\Session;
+use App\Models\Coach\SessionSelection;
 use App\Models\Membership;
 use App\Models\Product;
 use App\Models\ProductType;
@@ -41,16 +42,13 @@ class TestingController extends Controller
     public function index()
     {
 
-        $user = User::find(1);
-  //      foreach (User::all() as $user) {
-           // $user->evaluateMembership();
+        $session = Session::find(8583);
+        $sel = SessionSelection::find(8583);
+        dump($sel->avg_speed);
 
-        dump(Membership::evaluate($user));
+        $sel->crop($sel->start_time + 120, $sel->end_time);
 
-
-
-//        }
-
+        dump($sel->avg_speed);
 
 
         dump('ok');
