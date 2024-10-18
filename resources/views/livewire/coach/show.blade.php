@@ -319,14 +319,16 @@ new class extends Component {
 }
 ?>
 <div>
-    <x-mary-header title="Your training on {{ $session->createdon }}" subtitle="{{ $description }}" separator>
+    <x-mary-header title="Your training on {{ $session->createdon }}" separator>
         <x-slot:actions>
-            <x-mary-button icon="o-pencil-square" @click="$wire.showDescription = true" />
             <x-mary-select wire:model.change="units" wire:loading.attr="disabled" :options="UnitsEnum::cases()" option-label="name" option-value="value" x-on:change="$dispatch('units-changed')" />
         </x-slot:actions>
     </x-mary-header>
-    <x-mary-card title="Full Session Summary" class="mb-5">
+    <x-mary-card title="Full Session Summary" subtitle="{{ $description }}" class="mb-5">
         <livewire:coach.summary :session="$session" :units="$units" />
+        <x-slot:menu>
+            <x-mary-button label="Edit description" class="btn-sm" icon="o-pencil-square" @click="$wire.showDescription = true" />
+        </x-slot:menu>
     </x-mary-card>
     <x-mary-card class="mb-5" title="Analysis">
         @if(!empty($sessionSelection))
@@ -428,6 +430,7 @@ new class extends Component {
     let map;
     let highcharts = null;
     let forcedReset = false;
+    let firstInit = false;
 
     async function initMap() {
 
@@ -523,7 +526,18 @@ new class extends Component {
         });
     }
 
-    document.addEventListener('livewire:initialized', function () {
+
+   let initAll = function () {
+
+        // making sure it's only called once
+        if(firstInit)
+            return;
+
+        firstInit = true;
+
+        console.log('initialized');
+
+
         // init google maps
         initMap();
 
@@ -552,6 +566,13 @@ new class extends Component {
             console.log('changed units');
             reloadChart();
         });
-    });
+    };
+
+    /**
+     * We are using wire:navigate, so sometimes initialized is not called, only navigated
+     * The once option is to not run this on other pages
+     */
+    document.addEventListener('livewire:initialized', initAll, {once: true});
+    document.addEventListener('livewire:navigated', initAll, {once: true});
 </script>
 @endscript

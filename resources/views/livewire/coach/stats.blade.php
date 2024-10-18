@@ -50,7 +50,7 @@ new class extends Component {
             title="Total time"
             icon="tabler.clock-play"
             color="text-teal-800"
-            value="{{ Number::format($duration,1) }}"
+            value="{{ \Carbon\CarbonInterval::seconds($duration)->cascade()->forHumans(parts: 2) }}"
             description="hours"
         />
         <x-mary-stat

@@ -73,6 +73,12 @@ class CoachSessionController extends Controller
             'gpslat' => 0,
         ]);
 
+        activity()
+            ->on($session)
+            ->by($user)
+            ->event('created')
+            ->log('Coach session created');
+
         return CoachSessionResource::collection([$session]); // the client expects an array...
     }
 
@@ -131,8 +137,15 @@ class CoachSessionController extends Controller
         $sessions->each(function (Session $item, $key) use ($allJobs){
             Log::info('Adding job for session: '.$item->id);
             $allJobs->add(new CoachSessionUploadStatsJob($item));
+
+            activity()
+                ->on($item)
+                ->by($item->user)
+                ->event('uploaded')
+                ->log('Coach session uploaded');
         });
         Bus::chain($allJobs)->dispatch();
+
 
         return 'ok';
     }

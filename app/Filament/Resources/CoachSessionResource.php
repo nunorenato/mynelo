@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -17,7 +18,9 @@ class CoachSessionResource extends Resource
 {
     protected static ?string $model = Session::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-play';
+    protected static ?int $navigationSort = 25;
+
 
     public static function form(Form $form): Form
     {
@@ -31,9 +34,13 @@ class CoachSessionResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('createdon')
                 ->dateTime()
-                ->label('Date'),
+                ->label('Date')
+                ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
                 ->searchable(),
             ])
@@ -43,8 +50,10 @@ class CoachSessionResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('Update stats')
-                    ->action(fn (Session $record) => $record->updateStats()),
-                    
+                    ->action(fn (Session $record) => $record->updateStats())
+                    ->color('info')
+                    ->icon('heroicon-o-cpu-chip'),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

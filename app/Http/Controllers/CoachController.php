@@ -30,6 +30,13 @@ class CoachController extends Controller
 
         if (Auth::attempt($credentials)) {
             Log::info('Athlete authenticated');
+
+            activity()
+                ->on(Auth::user())
+                ->event('login')
+                ->log('Coach login');
+
+
             return [['id' => Auth::user()->id]];
         }
 

@@ -27,7 +27,7 @@ class AthleteTotals implements SessionValues
                                 0 as start_time, 0 as end_time')
                 ->first();
             $this->totalDistance = $totals->distance??0;
-            $this->totalDuration = ($totals->duration_sum??0)/3600; // in hours
+            $this->totalDuration = $totals->duration_sum??0;
             $this->avgSpeed = $totals->avg_speed??0;
             $this->avgDps = $totals->avg_dps??0;
         }
