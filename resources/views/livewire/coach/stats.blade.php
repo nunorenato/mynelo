@@ -51,7 +51,6 @@ new class extends Component {
             icon="tabler.clock-play"
             color="text-teal-800"
             value="{{ \Carbon\CarbonInterval::seconds($duration)->cascade()->forHumans(parts: 2) }}"
-            description="hours"
         />
         <x-mary-stat
             title="Average speed"
