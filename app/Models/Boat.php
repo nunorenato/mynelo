@@ -150,7 +150,7 @@ class Boat extends Model implements HasMedia
         $components = $neloApi->getBoatComponents($this->external_id);
         foreach ($components as $component){
 
-            $this->addProductFromAPI($component['product']['id'], empty($component['attribute'])?null:$component['attribute']['id']);
+            $this->addProductFromAPI($component['product']['id'], empty($component['attribute'])?null:$component['attribute']['id'], true);
 
         }
     }
@@ -196,10 +196,14 @@ class Boat extends Model implements HasMedia
         }
     }
 
-    public function addProductFromAPI($externalProductId, $externalAttributeId = null):void{
+    public function addProductFromAPI($externalProductId, $externalAttributeId = null, $ignoreFittings = false):void{
 
         $product = Product::getWithSync($externalProductId);
         if($product == null)
+            return;
+
+        // cases where we are importing components so we don't need fittings
+        if($ignoreFittings && $product->type->fitting == 1)
             return;
 
         if($externalAttributeId != null){
